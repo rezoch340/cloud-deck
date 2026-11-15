@@ -7,7 +7,7 @@
     <key>CFBundleExecutable</key>
     <string>ComfyCloud</string>
     <key>CFBundleIdentifier</key>
-    <string>local.lpitiless.ComfyCloud</string>
+    <string>app.clouddeck.comfycloud</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
