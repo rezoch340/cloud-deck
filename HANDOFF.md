@@ -4,6 +4,14 @@
 正式项目：本仓库根目录（`.`）
 原项目：`../../remote-ssh/ComfyUI-colab`（相对本仓库根目录）
 
+## 当前分支：Git 标签自动发版、客户端自更新、Windows 滚动条与项目文档重做（2026-11-15，`codex/git-release-updater`）
+
+- 自动发版与版本同步：新增 `.github/workflows/release.yml` 与 `client/scripts/sync-version.mjs`（含 `sync-version.d.mts`），并新增 `.gitattributes` 锁定 LF 行尾以确保 Windows Runner 检出时不会把内嵌至 Rust 二进制的 `start.sh` / Python 云端脚本转为 CRLF。按用户要求，GitHub Actions 发版工作流仅自动构建 Windows x64（`CloudDeck-<ver>-windows-x64-setup.exe` 与 `CloudDeck-<ver>-windows-x64-portable.zip`），同步 `client/package.json`、`client/src-tauri/tauri.conf.json`、`client/src-tauri/Cargo.toml`、`client/src-tauri/Cargo.lock` 四个文件，运行测试并生成 `SHA256SUMS.txt` 后在推送 `v*` 标签时发布 GitHub Release（macOS 应用由本机自行构建；`workflow_dispatch` 仅上传产物演练，不创建正式 Release）。
+- 客户端更新检查与自更新：新增 `client/src-tauri/src/update.rs` 并在 `lib.rs`、`api.ts`、`domain.ts`、`App.tsx`、`WorkspaceShell.tsx`、`WorkspaceViews.tsx` 接入 `check_update` / `install_update` / `open_release_page`、底栏 `可更新 vX.Y.Z` 胶囊及设置页“版本与更新”卡片（支持 `CLOUD_DECK_AUTO_UPDATE_CHECK=0` 关闭启动 3 秒后自动检查）。仅信任 HTTPS GitHub 官方允许域名并跳过 draft/prerelease；Windows 下通过同目录 `uninstall.exe` 区分 `windows_nsis` 与 `windows_portable`，NSIS 版在本地校验 `SHA256SUMS.txt` 与安装包字节上限/SHA-256 通过后以 `/P /UPDATE /R` 静默升级并重启，Portable 与 macOS 引导至浏览器对应 Release 下载。
+- Windows 滚动条与对齐修复：调整 `client/src/styles.css`、`WorkspaceShell.tsx` 与 `WorkspaceViews.tsx`，为 `[data-platform='win']` 启用透明轨道细胶囊圆角滚动条并隐藏箭头按钮，同时配置 `scrollbar-gutter: stable` 与右侧内边距补偿，消除 WebView2 经典灰轨滚动条与右侧卡片错位。
+- 项目文档与配图重做：新增 `docs/images/` 7 份图集（`hero-banner.svg`、`architecture.svg` 及脱敏示例界面图 `workspace-overview.png`、`applications-hub.png`、`app-detail-logs.png`、`files-sync-verified.png`、`settings-updater.png`），重写根 `README.md` 并同步更新 `client/README.md`（脱敏示例记录占位符并补充发版与更新章节）。
+- 本地交叉编译与离线验证：Windows 发行包已在本地交叉编译至 `/Volumes/CODEX_SCRATCH/build/cloud-deck/client/target/x86_64-pc-windows-msvc/release/`（主程序 `cloud-deck.exe` 17 MiB 及 `bundle/nsis/Cloud Deck_0.1.0_x64-setup.exe` 4.3 MiB）。当前离线验证通过：`sync-version.mjs 0.1.0 --check`、`format-check`、前端 `16/16`、`web-build`（`tsc --noEmit` + Vite）、`rust-test` `43/43`（含 `update` 7 项测试）、`agent-test` 41 通过 / 1 Linux 专属跳过（42 项）。后续已合并回 `main` 并推送 `v0.1.0` 标签触发 GitHub Release Windows 构建；Windows 实机安装升级仍待 Windows 环境真机验收。
+
 ## 当前分支：本机 MCP 第一版（2026-11-15，`codex/mcp-server`，本机冒烟通过）
 
 - 客户端内置 MCP 服务（`client/src-tauri/src/mcp.rs`），监听 `127.0.0.1` 随机端口，令牌和地址写入数据目录 `mcp.json`（0600）。拒绝无令牌/错令牌（401）和带 `Origin` 的请求（403），请求体上限 1 MiB。工具直接调用现有 Tauri 命令，与窗口共用状态。

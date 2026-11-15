@@ -194,7 +194,6 @@ code {
   display: flex;
   flex-direction: column;
   overflow: auto;
-  scrollbar-width: thin;
 }
 .cd-brand {
   display: flex;
@@ -247,6 +246,14 @@ code {
 .cd-nav-button small {
   font-size: 11px;
   color: var(--muted);
+}
+.cd-nav-button small.cd-update-dot {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent-soft-foreground);
+  background: var(--accent-soft);
 }
 .cd-sidebar-bottom {
   margin-top: auto;
@@ -326,6 +333,7 @@ code {
   height: 17px;
 }
 .cd-main {
+  --cd-page-pad-x: 30px;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -333,7 +341,7 @@ code {
   background: var(--surface);
 }
 .cd-page-header {
-  padding: 27px 30px 23px;
+  padding: 27px var(--cd-page-pad-x) 23px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -355,11 +363,10 @@ code {
   margin-top: 9px;
 }
 .cd-page-content {
-  padding: 0 30px 27px;
+  padding: 0 var(--cd-page-pad-x) 27px;
   flex: 1;
   min-height: 0;
   overflow: auto;
-  scrollbar-width: thin;
 }
 .cd-main-welcome .cd-page-content {
   display: flex;
@@ -369,8 +376,45 @@ code {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 0 30px 18px;
+  margin: 0 var(--cd-page-pad-x) 18px;
   flex: none;
+}
+/* 仅在不支持 ::-webkit-scrollbar 的引擎（如 Firefox 预览）启用标准细滚动条，避免 Chromium/WebView2 退回经典灰轨箭头样式。 */
+@supports not selector(::-webkit-scrollbar) {
+  .cd-sidebar,
+  .cd-page-content {
+    scrollbar-width: thin;
+  }
+}
+/* Windows WebView2 自定义细胶囊滚动条：隐藏上下箭头与灰底轨道，并与页头右侧按钮保持像素级对齐。 */
+[data-platform='win'] *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+[data-platform='win'] *::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+[data-platform='win'] *::-webkit-scrollbar-track,
+[data-platform='win'] *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+[data-platform='win'] *::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+  background-color: oklch(0.48 0.03 265 / 0.24);
+}
+[data-platform='win'] *::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(0.42 0.04 265 / 0.42);
+}
+[data-platform='win'] *::-webkit-scrollbar-thumb:active {
+  background-color: oklch(0.36 0.05 265 / 0.56);
+}
+[data-platform='win'] .cd-main:not(.cd-main-welcome) .cd-page-content {
+  scrollbar-gutter: stable;
+  padding-right: calc(var(--cd-page-pad-x) - 10px);
 }
 .cd-main-welcome .cd-alerts {
   margin-top: 20px;
@@ -438,6 +482,33 @@ code {
 }
 .cd-version {
   margin-left: 14px;
+}
+.cd-update-pill {
+  margin-left: 12px;
+  padding: 1px 8px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent-soft-foreground);
+  background: var(--accent-soft);
+  cursor: pointer;
+}
+.cd-update-pill:hover {
+  filter: brightness(0.96);
+}
+.cd-release-notes {
+  max-height: 190px;
+  overflow: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface-secondary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .cd-toast {
   position: absolute;
@@ -896,11 +967,14 @@ code {
   .cd-window {
     grid-template-columns: 188px minmax(0, 1fr);
   }
+  .cd-main {
+    --cd-page-pad-x: 25px;
+  }
   .cd-page-header {
-    padding: 25px 25px 21px;
+    padding: 25px var(--cd-page-pad-x) 21px;
   }
   .cd-page-content {
-    padding: 0 25px 23px;
+    padding: 0 var(--cd-page-pad-x) 23px;
   }
   .cd-main-welcome .cd-page-content {
     padding: 31px;
@@ -1063,8 +1137,11 @@ code {
   .cd-sidebar-bottom {
     padding-top: 16px;
   }
+  .cd-main {
+    --cd-page-pad-x: 19px;
+  }
   .cd-page-header {
-    padding: 22px 19px 18px;
+    padding: 22px var(--cd-page-pad-x) 18px;
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 15px;
@@ -1077,15 +1154,15 @@ code {
     line-height: 1.8;
   }
   .cd-page-content {
-    padding: 0 19px 22px;
+    padding: 0 var(--cd-page-pad-x) 22px;
   }
   .cd-main-welcome .cd-page-content {
     padding: 28px 20px;
     display: block;
   }
   .cd-alerts {
-    margin-left: 19px;
-    margin-right: 19px;
+    margin-left: var(--cd-page-pad-x);
+    margin-right: var(--cd-page-pad-x);
   }
   .cd-welcome h1 {
     font-size: 26px;

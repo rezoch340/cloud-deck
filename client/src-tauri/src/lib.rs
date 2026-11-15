@@ -12,6 +12,7 @@ mod model;
 mod native_smoke;
 mod readiness;
 mod transport;
+mod update;
 
 /// `--mcp-stdio` 入口：把 MCP 客户端的标准输入输出转发给正在运行的客户端。
 pub fn mcp_stdio(args: &[String]) -> i32 {
@@ -58,6 +59,8 @@ struct Backend {
     path: PathBuf,
     data: Mutex<Result<Stored, String>>,
     operation: tokio::sync::Mutex<()>,
+    update_operation: tokio::sync::Mutex<()>,
+    update: Mutex<update::UpdateStatus>,
     login_cancel: Mutex<Option<Arc<AtomicBool>>>,
     login_url: Arc<Mutex<Option<String>>>,
     cloud: cloud::Cloud,
@@ -67,6 +70,7 @@ impl Backend {
     fn snapshot(&self) -> Result<Snapshot, String> {
         let guard = self.data.lock().map_err(|_| "工作空间状态不可用。")?;
         let data = guard.as_ref().map_err(Clone::clone)?;
+        let update_state = self.update.lock().map_err(|_| "更新状态不可用。")?.clone();
         Ok(Snapshot {
             runtime: self.cloud.snapshot(&data.apps())?,
             apps: data.apps(),
@@ -80,6 +84,8 @@ impl Backend {
                 .to_string_lossy()
                 .into(),
             mode: "desktop".into(),
+            version: env!("CARGO_PKG_VERSION").into(),
+            update: update_state,
         })
     }
 
@@ -105,6 +111,157 @@ impl Backend {
 #[tauri::command]
 fn get_workspace(backend: State<'_, Backend>) -> Result<Snapshot, String> {
     backend.snapshot()
+}
+
+/// 刷新客户端版本检查状态（支持手动触发与启动后台静默检查共用）。
+async fn refresh_update_state(
+    backend: &Backend,
+    record_event: bool,
+) -> Result<update::UpdateStatus, String> {
+    let _update_guard = backend
+        .update_operation
+        .try_lock()
+        .map_err(|_| "正在检查或安装客户端更新，请稍候。".to_string())?;
+    {
+        let mut current = backend.update.lock().map_err(|_| "更新状态不可用。")?;
+        current.status = "checking".into();
+        current.error = None;
+    }
+    match update::check_latest().await {
+        Ok(next_status) => {
+            if let Ok(mut current) = backend.update.lock() {
+                *current = next_status.clone();
+            }
+            if record_event {
+                let summary = match next_status.status.as_str() {
+                    "available" => format!(
+                        "发现客户端新版本 v{}（当前 v{}）。",
+                        next_status.latest_version.as_deref().unwrap_or(""),
+                        next_status.current_version
+                    ),
+                    "up_to_date" => {
+                        format!("客户端已是最新版本（v{}）。", next_status.current_version)
+                    }
+                    "no_release" => "GitHub 仓库暂无已发布的正式版本。".into(),
+                    _ => "已完成客户端版本检查。".into(),
+                };
+                let _ = backend.change(|data| {
+                    data.event("info", "client", summary);
+                    Ok(())
+                });
+            }
+            Ok(next_status)
+        }
+        Err(error) => {
+            if let Ok(mut current) = backend.update.lock() {
+                current.status = "error".into();
+                current.checked_at = Some(model::now());
+                current.error = Some(error.clone());
+            }
+            if record_event {
+                let _ = backend.change(|data| {
+                    data.event("error", "client", format!("检查客户端更新失败：{error}"));
+                    Ok(())
+                });
+            }
+            Err(error)
+        }
+    }
+}
+
+#[tauri::command]
+async fn check_update(backend: State<'_, Backend>) -> Result<Snapshot, String> {
+    refresh_update_state(&backend, true).await?;
+    backend.snapshot()
+}
+
+#[tauri::command]
+fn open_release_page(app: tauri::AppHandle, backend: State<'_, Backend>) -> Result<(), String> {
+    let target_url = backend
+        .update
+        .lock()
+        .ok()
+        .map(|state| state.release_url.clone())
+        .unwrap_or_else(|| update::RELEASES_PAGE_URL.to_owned());
+    update::validate_github_url(&target_url)?;
+    app.opener()
+        .open_url(target_url, None::<&str>)
+        .map_err(|_| "无法在系统浏览器打开 GitHub Release 页面。".into())
+}
+
+#[tauri::command]
+async fn install_update(
+    app: tauri::AppHandle,
+    backend: State<'_, Backend>,
+) -> Result<Snapshot, String> {
+    let _cloud_idle = backend
+        .operation
+        .try_lock()
+        .map_err(|_| "当前正在执行云端操作，请等待完成后再安装更新。".to_string())?;
+    let _update_guard = backend
+        .update_operation
+        .try_lock()
+        .map_err(|_| "更新任务已在执行中，请勿重复点击。".to_string())?;
+
+    let current_update = {
+        let mut guard = backend.update.lock().map_err(|_| "更新状态不可用。")?;
+        if guard.status != "available" || !guard.can_self_update {
+            return Err(
+                "当前没有可直接覆盖安装的更新，请先检查更新或前往 GitHub Release 下载。".into(),
+            );
+        }
+        guard.status = "installing".into();
+        guard.error = None;
+        guard.clone()
+    };
+
+    let data_root = backend
+        .path
+        .parent()
+        .unwrap_or_else(|| std::path::Path::new("."))
+        .to_path_buf();
+
+    let installer_result = async {
+        let installer_path =
+            update::download_verified_installer(&current_update, &data_root).await?;
+        update::launch_windows_installer(&installer_path)?;
+        Ok::<_, String>(())
+    }
+    .await;
+
+    match installer_result {
+        Ok(()) => {
+            let target_version = current_update
+                .latest_version
+                .unwrap_or_else(|| "latest".into());
+            let _ = backend.change(|data| {
+                data.event(
+                    "info",
+                    "client",
+                    format!("已通过 SHA-256 校验并启动 v{target_version} 更新安装程序，客户端即将重启。"),
+                );
+                Ok(())
+            });
+            let snapshot = backend.snapshot()?;
+            // 延迟片刻退出，保证本次 Tauri IPC 响应正常返回前端，随后交由 NSIS 覆盖安装并自动拉起新版。
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+                app.exit(0);
+            });
+            Ok(snapshot)
+        }
+        Err(error) => {
+            if let Ok(mut guard) = backend.update.lock() {
+                guard.status = "available".into();
+                guard.error = Some(error.clone());
+            }
+            let _ = backend.change(|data| {
+                data.event("error", "client", format!("安装客户端更新失败：{error}"));
+                Ok(())
+            });
+            Err(error)
+        }
+    }
 }
 
 #[tauri::command]
@@ -866,6 +1023,8 @@ pub fn run() {
                 path,
                 data: Mutex::new(data),
                 operation: tokio::sync::Mutex::new(()),
+                update_operation: tokio::sync::Mutex::new(()),
+                update: Mutex::new(update::UpdateStatus::initial()),
                 login_cancel: Mutex::new(None),
                 login_url: Arc::new(Mutex::new(None)),
                 cloud: cloud::Cloud::default(),
@@ -877,6 +1036,17 @@ pub fn run() {
                 if let Err(error) = mcp::start(app.handle().clone(), &root) {
                     eprintln!("Cloud Deck MCP 未启动：{error}");
                 }
+            }
+            if !smoke_mode()
+                && !live_check_mode()
+                && std::env::var("CLOUD_DECK_AUTO_UPDATE_CHECK").as_deref() != Ok("0")
+            {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+                    let backend = handle.state::<Backend>();
+                    let _ = refresh_update_state(&backend, false).await;
+                });
             }
             Ok(())
         })
@@ -936,6 +1106,9 @@ pub fn run() {
             save_application,
             save_application_manifest,
             remove_application,
+            check_update,
+            install_update,
+            open_release_page,
             sign_in,
             cancel_sign_in,
             reopen_sign_in,

@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
+import { desktop } from '../api.ts';
 import { Badge, Button, EmptyState, Notice, Panel } from '../components/ui.tsx';
 import { GoogleMark, Icon } from '../components/Icon.tsx';
 import type { AuthProgress, Snapshot } from '../domain.ts';
-import { cloudLabels, mayLeaveAccount, observedTime } from '../domain.ts';
+import { bytes, cloudLabels, mayLeaveAccount, observedTime, updateSummary } from '../domain.ts';
 
 export function LoginButton({
   label = '使用 Google 账号继续',
@@ -166,6 +167,7 @@ export function Welcome({
 const category: Record<string, string> = {
   account: '账号',
   application: '应用',
+  client: '客户端',
   instance: '实例',
   connection: '连接',
 };
@@ -194,15 +196,118 @@ export function Settings({
   snapshot,
   login,
   signOut,
+  checkUpdate,
+  installUpdate,
+  openReleasePage,
   busy,
 }: {
   snapshot: Snapshot;
   login: ReactNode;
   signOut: () => void;
+  checkUpdate: () => void;
+  installUpdate: () => void;
+  openReleasePage: () => void;
   busy: boolean;
 }) {
+  const update = snapshot.update;
+  const summary = updateSummary(update);
+  const isUpdating = update.status === 'checking' || update.status === 'installing';
   return (
     <div className="cd-stack">
+      <Panel
+        title="版本与更新"
+        description="查询 GitHub Releases 正式版本，校验安装包摘要后更新客户端。"
+        actions={<Badge tone={summary.badge.tone}>{summary.badge.label}</Badge>}
+      >
+        <dl className="cd-properties">
+          <div>
+            <dt>当前版本</dt>
+            <dd>
+              <code>v{snapshot.version}</code>
+            </dd>
+          </div>
+          <div>
+            <dt>安装形态</dt>
+            <dd>{summary.modeLabel}</dd>
+          </div>
+          <div>
+            <dt>最新发布</dt>
+            <dd>
+              {update.latestVersion ? (
+                <>
+                  <code>v{update.latestVersion}</code>
+                  {update.assetName && (
+                    <span className="ml-2 text-muted">
+                      · {update.assetName}
+                      {update.assetSize != null ? `（${bytes(update.assetSize)}）` : ''}
+                    </span>
+                  )}
+                </>
+              ) : update.status === 'no_release' ? (
+                '仓库暂未发布正式版本'
+              ) : (
+                '待检查'
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt>最近检查</dt>
+            <dd>{update.checkedAt ? observedTime(update.checkedAt) : '尚未检查'}</dd>
+          </div>
+        </dl>
+        {update.error && (
+          <div className="mt-4">
+            <Notice tone="bad">{update.error}</Notice>
+          </div>
+        )}
+        {update.status === 'available' && update.releaseNotes && (
+          <div className="mt-4">
+            <p className="mb-2 text-xs font-medium text-muted">
+              {update.releaseName || `v${update.latestVersion}`} 更新说明
+            </p>
+            <pre className="cd-release-notes">{update.releaseNotes}</pre>
+          </div>
+        )}
+        {update.status === 'available' && update.canSelfUpdate && (
+          <div className="mt-4">
+            <Notice tone="accent">
+              下载完成后将自动核对 SHA-256
+              校验值并覆盖安装；重启客户端不会停止云端实例或运行中的应用。
+            </Notice>
+          </div>
+        )}
+        <div className="cd-actions">
+          <Button
+            variant={update.status === 'available' ? 'secondary' : 'primary'}
+            isDisabled={!desktop || busy || isUpdating}
+            onPress={checkUpdate}
+          >
+            <Icon name="refresh" />
+            检查更新
+          </Button>
+          {update.status === 'available' && update.canSelfUpdate && (
+            <Button
+              variant="primary"
+              isDisabled={!desktop || busy || isUpdating}
+              onPress={installUpdate}
+            >
+              下载并覆盖更新
+            </Button>
+          )}
+          <Button
+            variant={
+              update.status === 'available' && !update.canSelfUpdate ? 'primary' : 'tertiary'
+            }
+            isDisabled={!desktop || isUpdating}
+            onPress={openReleasePage}
+          >
+            {update.status === 'available' && !update.canSelfUpdate
+              ? '前往 GitHub 下载新版'
+              : '查看 GitHub Releases'}
+            <Icon name="arrow" />
+          </Button>
+        </div>
+      </Panel>
       <Panel title="Google 账号">
         {snapshot.account ? (
           <>

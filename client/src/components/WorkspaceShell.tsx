@@ -38,12 +38,18 @@ export function WorkspaceShell({
   const [platform, setPlatform] = useState(navigator.userAgent.includes('Mac') ? 'mac' : 'win');
   const heading = useRef<HTMLHeadingElement>(null);
   const main = useRef<HTMLDivElement>(null);
+  // 将当前平台标识挂到根文档节点，保证弹窗与下拉浮层也能匹配平台专属滚动条样式。
+  useEffect(() => {
+    document.documentElement.dataset.platform = platform;
+  }, [platform]);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
     main.current?.scrollTo(0, 0);
   }, [page]);
   const preview = snapshot?.mode !== 'desktop';
   const cloud = snapshot ? cloudLabels(snapshot.observation) : null;
+  const currentVersion = snapshot?.version || '0.1.0';
+  const hasUpdate = snapshot?.update?.status === 'available';
   const states = Object.values(snapshot?.runtime.applications || {});
   const appState = states.includes('failed')
     ? '有失败项'
@@ -159,6 +165,7 @@ export function WorkspaceShell({
             >
               <Icon name="settings" />
               <span>设置</span>
+              {hasUpdate && <small className="cd-update-dot">新版本</small>}
             </Button>
             <Button
               variant="ghost"
@@ -227,7 +234,12 @@ export function WorkspaceShell({
           </div>
           <span>
             {snapshot?.account ? cloud?.billing : '登录不会申请实例'}
-            <span className="cd-version">0.1.0</span>
+            {hasUpdate && snapshot?.update?.latestVersion && (
+              <button type="button" className="cd-update-pill" onClick={() => navigate('settings')}>
+                可更新 v{snapshot.update.latestVersion}
+              </button>
+            )}
+            <span className="cd-version">v{currentVersion}</span>
           </span>
         </footer>
         {toast && (

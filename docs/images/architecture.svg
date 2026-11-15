@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" width="1200" height="560" role="img" aria-label="Cloud Deck 系统架构与生命周期">
+  <defs>
+    <linearGradient id="archBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7f8fc"/>
+      <stop offset="100%" stop-color="#eff1f9"/>
+    </linearGradient>
+    <filter id="panelShadow" x="-5%" y="-5%" width="110%" height="114%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#202642" flood-opacity="0.05"/>
+    </filter>
+    <marker id="arrowIndigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8.5 5 L 0 8.5 z" fill="#584dd8"/>
+    </marker>
+    <marker id="arrowTeal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8.5 5 L 0 8.5 z" fill="#1c7a5e"/>
+    </marker>
+  </defs>
+
+  <!-- 画布背景 -->
+  <rect x="2" y="2" width="1196" height="556" rx="24" fill="url(#archBg)" stroke="#dfe3f2" stroke-width="2"/>
+
+  <!-- 顶部标题 -->
+  <g transform="translate(44, 44)" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+    <text x="0" y="0" font-size="22" font-weight="750" fill="#1e2337">四层状态解耦架构与安全关机闭环</text>
+    <text x="0" y="24" font-size="13.5" fill="#5e6682">实例计费、SSH 传输、守护内应用进程与 Google Drive 同步各自独立观测：网络断连不误判关机，校验未过绝不释放机器。</text>
+  </g>
+
+  <!-- 第 1 列：桌面客户端 -->
+  <g transform="translate(40, 92)" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+    <rect x="0" y="0" width="336" height="340" rx="18" fill="#ffffff" stroke="#dce0f0" stroke-width="1.5" filter="url(#panelShadow)"/>
+    <rect x="18" y="18" width="174" height="26" rx="13" fill="#ecebfd"/>
+    <text x="105" y="35" font-size="12.5" font-weight="700" fill="#4c40c6" text-anchor="middle">1 · 跨平台桌面端 (Tauri 2)</text>
+    <text x="316" y="35" font-size="12" fill="#777f9b" text-anchor="end">Win / macOS</text>
+
+    <rect x="18" y="58" width="300" height="58" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="80" font-size="13.5" font-weight="650" fill="#232940">HeroUI v3 工作台与清单编辑器</text>
+    <text x="32" y="101" font-size="11.5" fill="#646c88">工作台 · 应用详情日志 · 文件校验清单 · 活动记录</text>
+
+    <rect x="18" y="126" width="300" height="58" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="148" font-size="13.5" font-weight="650" fill="#232940">系统浏览器 OAuth 与系统凭据库</text>
+    <text x="32" y="169" font-size="11.5" fill="#646c88">PKCE 校验；令牌仅存系统钥匙串与凭据管理器</text>
+
+    <rect x="18" y="194" width="300" height="58" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="216" font-size="13.5" font-weight="650" fill="#232940">内置本机 MCP 服务 (127.0.0.1)</text>
+    <text x="32" y="237" font-size="12" fill="#646c88">--mcp-stdio 接入 AI 助手，校验清单并编排应用</text>
+
+    <rect x="18" y="262" width="300" height="58" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="284" font-size="13.5" font-weight="650" fill="#232940">GitHub Release 版本检查与自更新</text>
+    <text x="32" y="305" font-size="12" fill="#646c88">SHA256SUMS 校验 + Windows NSIS 静默覆盖升级</text>
+  </g>
+
+  <!-- 第 2 列：Rust 原生传输层 -->
+  <g transform="translate(432, 92)" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+    <rect x="0" y="0" width="312" height="340" rx="18" fill="#ffffff" stroke="#dce0f0" stroke-width="1.5" filter="url(#panelShadow)"/>
+    <rect x="18" y="18" width="184" height="26" rx="13" fill="#e8f0fe"/>
+    <text x="110" y="35" font-size="12.5" font-weight="700" fill="#295ec9" text-anchor="middle">2 · 内置安全传输 (Rust Core)</text>
+
+    <rect x="18" y="58" width="276" height="78" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="81" font-size="13.5" font-weight="650" fill="#232940">原生 SSH over Colab WSS</text>
+    <text x="32" y="102" font-size="12" fill="#646c88">基于 russh + rustls 加密隧道，不依赖</text>
+    <text x="32" y="120" font-size="12" fill="#646c88">外部 ssh 可执行文件或本机 Python</text>
+
+    <rect x="18" y="148" width="276" height="78" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="171" font-size="13.5" font-weight="650" fill="#232940">仅限回环地址的端口转发</text>
+    <text x="32" y="192" font-size="12" fill="#646c88">127.0.0.1:localPort → 远端端口，</text>
+    <text x="32" y="210" font-size="12" fill="#646c88">双重就绪检查通过后才开放浏览器入口</text>
+
+    <rect x="18" y="238" width="276" height="82" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="261" font-size="13.5" font-weight="650" fill="#232940">开机与重连严格分离</text>
+    <text x="32" y="282" font-size="12" fill="#646c88">开机只部署守护进程；断线仅重连指定</text>
+    <text x="32" y="300" font-size="12" fill="#646c88">现有实例，绝不重复分配新机器</text>
+  </g>
+
+  <!-- 第 3 列：云端实例与 Drive -->
+  <g transform="translate(800, 92)" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+    <rect x="0" y="0" width="360" height="340" rx="18" fill="#ffffff" stroke="#dce0f0" stroke-width="1.5" filter="url(#panelShadow)"/>
+    <rect x="18" y="18" width="184" height="26" rx="13" fill="#e1f4ed"/>
+    <text x="110" y="35" font-size="12.5" font-weight="700" fill="#176b52" text-anchor="middle">3 · 云端守护与 Google Drive</text>
+    <text x="340" y="35" font-size="12" fill="#777f9b" text-anchor="end">Linux VM</text>
+
+    <rect x="18" y="58" width="324" height="58" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="80" font-size="13.5" font-weight="650" fill="#232940">cloud_heartbeat.py · 云端独立保活</text>
+    <text x="32" y="101" font-size="12" fill="#646c88">60s 周期维护本机 Kernel 活跃，关闭客户端不中断</text>
+
+    <rect x="18" y="126" width="324" height="58" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="148" font-size="13.5" font-weight="650" fill="#232940">cloud_lifecycle.py · 有序资源与恢复</text>
+    <text x="32" y="169" font-size="11.5" fill="#646c88">镜像优先拉取与 SHA-256 校验，失败自动回退 Drive</text>
+
+    <rect x="18" y="194" width="324" height="58" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="216" font-size="13.5" font-weight="650" fill="#232940">cloud_agent.py · 通用进程监管与探针</text>
+    <text x="32" y="237" font-size="11.5" fill="#646c88">支持任意命令脚本、HTTP/TCP 就绪探针与实时日志</text>
+
+    <rect x="18" y="262" width="324" height="58" rx="12" fill="#f8f9fd" stroke="#e6e9f5"/>
+    <text x="32" y="284" font-size="13.5" font-weight="650" fill="#232940">Google Drive 服务端一致性核验</text>
+    <text x="32" y="305" font-size="12" fill="#646c88">停进程组后同步目录，直查 Drive API 核对大小与 MD5</text>
+  </g>
+
+  <!-- 列间连接箭头 -->
+  <g fill="none" stroke-width="2.2">
+    <line x1="378" y1="226" x2="428" y2="226" stroke="#584dd8" marker-end="url(#arrowIndigo)"/>
+    <line x1="428" y1="262" x2="378" y2="262" stroke="#584dd8" stroke-dasharray="4 4" marker-end="url(#arrowIndigo)"/>
+
+    <line x1="746" y1="226" x2="796" y2="226" stroke="#1c7a5e" marker-end="url(#arrowTeal)"/>
+    <line x1="796" y1="262" x2="746" y2="262" stroke="#1c7a5e" stroke-dasharray="4 4" marker-end="url(#arrowTeal)"/>
+  </g>
+
+  <!-- 底部四步标准生命周期条 -->
+  <g transform="translate(40, 452)" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+    <rect x="0" y="0" width="1120" height="76" rx="16" fill="#ffffff" stroke="#dce0f0" stroke-width="1.5"/>
+
+    <g transform="translate(22, 16)">
+      <rect x="0" y="0" width="248" height="44" rx="10" fill="#f4f5fc"/>
+      <text x="14" y="19" font-size="12" font-weight="700" fill="#4c40c6">STEP 01 · 选择算力开机</text>
+      <text x="14" y="36" font-size="11.5" fill="#5d6582">分配 GPU/CPU，自动部署并接通守护</text>
+    </g>
+
+    <line x1="276" y1="38" x2="296" y2="38" stroke="#584dd8" stroke-width="1.8" marker-end="url(#arrowIndigo)"/>
+
+    <g transform="translate(302, 16)">
+      <rect x="0" y="0" width="248" height="44" rx="10" fill="#f4f5fc"/>
+      <text x="14" y="19" font-size="12" font-weight="700" fill="#4c40c6">STEP 02 · 按清单准备与启动</text>
+      <text x="14" y="36" font-size="11.5" fill="#5d6582">外部镜像优先拉取 → Drive 恢复 → 命令</text>
+    </g>
+
+    <line x1="556" y1="38" x2="576" y2="38" stroke="#584dd8" stroke-width="1.8" marker-end="url(#arrowIndigo)"/>
+
+    <g transform="translate(582, 16)">
+      <rect x="0" y="0" width="248" height="44" rx="10" fill="#f4f5fc"/>
+      <text x="14" y="19" font-size="12" font-weight="700" fill="#4c40c6">STEP 03 · 探针就绪与保活</text>
+      <text x="14" y="36" font-size="11.5" fill="#5d6582">HTTP/TCP/脚本通过后放行，60s 独立保活</text>
+    </g>
+
+    <line x1="836" y1="38" x2="856" y2="38" stroke="#1c7a5e" stroke-width="1.8" marker-end="url(#arrowTeal)"/>
+
+    <g transform="translate(862, 16)">
+      <rect x="0" y="0" width="240" height="44" rx="10" fill="#eaf7f2"/>
+      <text x="14" y="19" font-size="12" font-weight="700" fill="#176b52">STEP 04 · 服务端校验并关机</text>
+      <text x="14" y="36" font-size="11.2" fill="#2c6b58">核对 Drive 大小/MD5 → 释放并确认零计费</text>
+    </g>
+  </g>
+</svg>

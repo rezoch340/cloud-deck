@@ -67,6 +67,32 @@ export interface ApplicationLog {
     updatedAt?: number;
   } | null;
 }
+/** 客户端版本检查与自更新状态。 */
+export interface UpdateStatus {
+  status:
+    | 'idle'
+    | 'checking'
+    | 'up_to_date'
+    | 'available'
+    | 'no_release'
+    | 'installing'
+    | 'error'
+    | string;
+  currentVersion: string;
+  latestVersion?: string | null;
+  releaseName?: string | null;
+  releaseNotes?: string | null;
+  releaseUrl: string;
+  publishedAt?: string | null;
+  downloadUrl?: string | null;
+  assetName?: string | null;
+  assetSize?: number | null;
+  checksumUrl?: string | null;
+  canSelfUpdate: boolean;
+  installMode: 'windows_nsis' | 'windows_portable' | 'macos_bundle' | string;
+  checkedAt?: number | null;
+  error?: string | null;
+}
 export interface Snapshot {
   apps: Recipe[];
   account: Account | null;
@@ -102,10 +128,41 @@ export interface Snapshot {
   };
   dataDirectory: string;
   mode: 'desktop' | 'preview';
+  version: string;
+  update: UpdateStatus;
 }
 export interface AuthProgress {
   phase: 'preparing' | 'waiting' | 'verifying' | 'checking';
   message: string;
+}
+/** 将客户端版本检查结果转换为界面展示徽章与安装形态说明。 */
+export function updateSummary(update: UpdateStatus) {
+  const modeLabel =
+    update.installMode === 'windows_nsis'
+      ? 'Windows 安装版（支持校验后自动覆盖更新）'
+      : update.installMode === 'windows_portable'
+        ? 'Windows 便携版（前往 GitHub Release 下载替换）'
+        : update.installMode === 'macos_bundle'
+          ? 'macOS 应用包（前往 GitHub Release 下载替换）'
+          : '桌面客户端';
+  const badge =
+    update.status === 'available'
+      ? ({
+          label: update.latestVersion ? `发现新版本 v${update.latestVersion}` : '发现新版本',
+          tone: 'accent',
+        } as const)
+      : update.status === 'up_to_date'
+        ? ({ label: '已是最新版本', tone: 'good' } as const)
+        : update.status === 'no_release'
+          ? ({ label: '暂无已发布版本', tone: 'neutral' } as const)
+          : update.status === 'checking'
+            ? ({ label: '正在检查…', tone: 'neutral' } as const)
+            : update.status === 'installing'
+              ? ({ label: '正在校验并安装…', tone: 'accent' } as const)
+              : update.status === 'error'
+                ? ({ label: '检查未完成', tone: 'bad' } as const)
+                : ({ label: '尚未检查', tone: 'neutral' } as const);
+  return { modeLabel, badge };
 }
 export const emptyObservation = (): Observation => ({
   status: 'unobserved',

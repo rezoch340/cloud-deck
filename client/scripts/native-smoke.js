@@ -15,7 +15,16 @@
     await waitFor(() => document.querySelector('nav button[aria-label="应用"]'));
     const initial = await invoke('get_workspace');
     if (initial.mode !== 'desktop') throw Error('Native IPC is not connected');
+    if (!initial.version || initial.update?.currentVersion !== initial.version) {
+      throw Error('Native workspace version and update state are missing');
+    }
     checks.push('Tauri native IPC connected');
+    document.querySelector('button[aria-label="设置"]').click();
+    await waitFor(() => document.querySelector('.cd-page-content')?.textContent.includes('版本与更新'));
+    if (!document.querySelector('.cd-statusbar')?.textContent.includes(`v${initial.version}`)) {
+      throw Error('Dynamic client version did not render in statusbar');
+    }
+    checks.push('Settings update checker panel and dynamic statusbar version rendered');
     document.querySelector('nav button[aria-label="应用"]').click();
     await waitFor(() => button('添加任务'));
     button('添加任务').click();

@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-label="Cloud Deck 通用云端 GPU 工作台">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f6f7fc"/>
+      <stop offset="55%" stop-color="#f1f3fa"/>
+      <stop offset="100%" stop-color="#eceffd"/>
+    </linearGradient>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#665be8"/>
+      <stop offset="100%" stop-color="#4c41c6"/>
+    </linearGradient>
+    <radialGradient id="glowRight" cx="82%" cy="22%" r="48%">
+      <stop offset="0%" stop-color="#685de8" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#685de8" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dotGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#c7cde2" fill-opacity="0.45"/>
+    </pattern>
+    <filter id="cardShadow" x="-8%" y="-8%" width="116%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#232946" flood-opacity="0.07"/>
+    </filter>
+  </defs>
+
+  <!-- 外框画布 -->
+  <rect x="2" y="2" width="1196" height="336" rx="24" fill="url(#bgGrad)" stroke="#dfe3f2" stroke-width="2"/>
+  <rect x="2" y="2" width="1196" height="336" rx="24" fill="url(#dotGrid)"/>
+  <rect x="2" y="2" width="1196" height="336" rx="24" fill="url(#glowRight)"/>
+
+  <!-- 左侧品牌图标与顶部标签 -->
+  <g transform="translate(56, 46)">
+    <rect x="0" y="0" width="60" height="60" rx="16" fill="url(#brandGrad)" filter="url(#cardShadow)"/>
+    <g transform="translate(12, 12) scale(1.5)" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m3 7 9-5 9 5-9 5-9-5Z"/>
+      <path d="m3 12 9 5 9-5"/>
+      <path d="m3 17 9 5 9-5"/>
+    </g>
+
+    <rect x="76" y="14" width="336" height="30" rx="15" fill="#e9e8fc" stroke="#d5d2f8"/>
+    <circle cx="94" cy="29" r="4" fill="#584dd8"/>
+    <text x="106" y="34" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="600" fill="#493ec2" letter-spacing="0.3">WINDOWS &amp; MACOS DESKTOP WORKSTATION</text>
+  </g>
+
+  <!-- 主标题与核心定位 -->
+  <g transform="translate(56, 148)" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+    <text x="0" y="0" font-size="44" font-weight="750" fill="#1e2337" letter-spacing="-0.6">Cloud Deck</text>
+    <text x="248" y="-3" font-size="21" font-weight="600" fill="#4f5672">通用云端 GPU 工作台与应用生命周期管理</text>
+
+    <text x="0" y="40" font-size="15" fill="#58607d">基于 Tauri 2 + Rust 内置 SSH over WSS，无需外部终端即可连接云端算力；以通用 manifest.json 驱动任意</text>
+    <text x="0" y="64" font-size="15" fill="#58607d">服务与任务，配备云端独立保活线程与 Google Drive 服务端校验关机闭环。</text>
+  </g>
+
+  <!-- 底部特性胶囊 -->
+  <g transform="translate(56, 250)" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif" font-size="13" font-weight="600" fill="#323954">
+    <rect x="0" y="0" width="136" height="34" rx="17" fill="#ffffff" stroke="#dce0ef"/>
+    <text x="68" y="22" text-anchor="middle">内置 SSH 隧道</text>
+
+    <rect x="146" y="0" width="146" height="34" rx="17" fill="#ffffff" stroke="#dce0ef"/>
+    <text x="219" y="22" text-anchor="middle">通用 manifest 清单</text>
+
+    <rect x="302" y="0" width="134" height="34" rx="17" fill="#ffffff" stroke="#dce0ef"/>
+    <text x="369" y="22" text-anchor="middle">60s 云端独立保活</text>
+
+    <rect x="446" y="0" width="144" height="34" rx="17" fill="#ffffff" stroke="#dce0ef"/>
+    <text x="518" y="22" text-anchor="middle">Drive 校验关机</text>
+
+    <rect x="600" y="0" width="116" height="34" rx="17" fill="#ffffff" stroke="#dce0ef"/>
+    <text x="658" y="22" text-anchor="middle">本机 MCP 服务</text>
+  </g>
+
+  <!-- 右侧缩略状态预览卡片 -->
+  <g transform="translate(794, 42)" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+    <rect x="0" y="0" width="356" height="256" rx="20" fill="#ffffff" stroke="#dfe3f1" stroke-width="1.5" filter="url(#cardShadow)"/>
+
+    <!-- 卡片头 -->
+    <circle cx="26" cy="28" r="5" fill="#1e8262"/>
+    <text x="40" y="33" font-size="13.5" font-weight="650" fill="#252b42">Google Colab · L4 实例</text>
+    <rect x="256" y="15" width="80" height="25" rx="12.5" fill="#e1f4ed"/>
+    <text x="296" y="32" font-size="12" font-weight="650" fill="#176b52" text-anchor="middle">实例运行中</text>
+
+    <!-- 地区标签 -->
+    <rect x="20" y="50" width="194" height="24" rx="12" fill="#eeedfd"/>
+    <text x="117" y="66" font-size="12" font-weight="600" fill="#4f43ca" text-anchor="middle">分配地区：台湾彰化 · asia-east1</text>
+
+    <line x1="20" y1="88" x2="336" y2="88" stroke="#eceff7" stroke-width="1.2"/>
+
+    <!-- 三个指标 -->
+    <text x="20" y="109" font-size="11.5" fill="#6d7592">可用计算点数</text>
+    <text x="20" y="132" font-size="19" font-weight="700" fill="#1e2337">1,860.50</text>
+
+    <text x="142" y="109" font-size="11.5" fill="#6d7592">当前消耗</text>
+    <text x="142" y="132" font-size="19" font-weight="700" fill="#1e2337">1.94 <tspan font-size="12" font-weight="500" fill="#6d7592">点/h</tspan></text>
+
+    <text x="252" y="109" font-size="11.5" fill="#6d7592">云端保活</text>
+    <text x="252" y="132" font-size="15" font-weight="700" fill="#176b52">Kernel 已确认</text>
+
+    <line x1="20" y1="149" x2="336" y2="149" stroke="#eceff7" stroke-width="1.2"/>
+
+    <!-- 应用与同步状态条目 -->
+    <rect x="20" y="162" width="316" height="36" rx="10" fill="#f7f8fc" stroke="#e8ebf5"/>
+    <text x="34" y="185" font-size="13" font-weight="650" fill="#252b42">ComfyUI</text>
+    <text x="104" y="185" font-size="12" font-family="'Cascadia Code','SFMono-Regular',Consolas,monospace" fill="#666e8a">127.0.0.1:18188 → 8188</text>
+    <text x="322" y="185" font-size="12" font-weight="650" fill="#176b52" text-anchor="end">已就绪</text>
+
+    <rect x="20" y="206" width="316" height="36" rx="10" fill="#f7f8fc" stroke="#e8ebf5"/>
+    <text x="34" y="229" font-size="13" font-weight="650" fill="#252b42">Google Drive</text>
+    <text x="126" y="229" font-size="12" fill="#666e8a">SHA-256 / MD5 校验闭环</text>
+    <text x="322" y="229" font-size="12" font-weight="650" fill="#4f43ca" text-anchor="end">已核验</text>
+  </g>
+</svg>

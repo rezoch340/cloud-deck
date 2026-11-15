@@ -247,6 +247,9 @@ export default function App() {
             login={loginControl}
             busy={busy}
             signOut={() => void perform(api.signOut)}
+            checkUpdate={() => void perform(api.checkUpdate)}
+            installUpdate={() => void perform(api.installUpdate)}
+            openReleasePage={() => void api.openReleasePage().catch(notifyFailure)}
           />
         );
     }

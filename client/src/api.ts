@@ -1,10 +1,18 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import comfyManifest from '../applications/comfyui/manifest.json';
+import packageJson from '../package.json';
 import { manifestRecipe, parseApplicationManifest } from './manifest.ts';
 import type { ApplicationManifest } from './manifest.ts';
 import { emptyObservation, validateRecipe } from './domain.ts';
-import type { ApplicationLog, AuthProgress, Recipe, RecipeDraft, Snapshot } from './domain.ts';
+import type {
+  ApplicationLog,
+  AuthProgress,
+  Recipe,
+  RecipeDraft,
+  Snapshot,
+  UpdateStatus,
+} from './domain.ts';
 
 export const desktop = isTauri();
 const key = 'cloud-deck-browser-preview-v1';
@@ -12,6 +20,27 @@ export const builtinRecipe = manifestRecipe(
   parseApplicationManifest(JSON.stringify(comfyManifest)),
   true,
 );
+
+/** 生成浏览器预览模式使用的默认客户端更新状态。 */
+export function defaultUpdateStatus(currentVersion = packageJson.version): UpdateStatus {
+  return {
+    status: 'idle',
+    currentVersion,
+    latestVersion: null,
+    releaseName: null,
+    releaseNotes: null,
+    releaseUrl: 'https://github.com/rezoch340/cloud-deck/releases',
+    publishedAt: null,
+    downloadUrl: null,
+    assetName: null,
+    assetSize: null,
+    checksumUrl: null,
+    canSelfUpdate: false,
+    installMode: 'macos_bundle',
+    checkedAt: null,
+    error: null,
+  };
+}
 
 function preview(): Snapshot {
   const raw = localStorage.getItem(key);
@@ -61,6 +90,8 @@ function preview(): Snapshot {
     },
     mode: 'preview',
     dataDirectory: '仅保存在当前浏览器的预览数据中',
+    version: packageJson.version,
+    update: defaultUpdateStatus(),
   };
 }
 function persistPreview(snapshot: Snapshot) {
@@ -166,6 +197,9 @@ export const shutdownCloud = () => (desktop ? invoke<Snapshot>('shutdown_cloud')
 export const releaseEmptyInstance = () =>
   desktop ? invoke<Snapshot>('release_empty_instance') : nativeOnly();
 export const signOut = () => (desktop ? invoke<Snapshot>('sign_out') : nativeOnly());
+export const checkUpdate = () => (desktop ? invoke<Snapshot>('check_update') : nativeOnly());
+export const installUpdate = () => (desktop ? invoke<Snapshot>('install_update') : nativeOnly());
+export const openReleasePage = () => (desktop ? invoke<void>('open_release_page') : nativeOnly());
 export async function onAuthProgress(callback: (progress: AuthProgress) => void) {
   if (!desktop) return () => {};
   return listen<AuthProgress>('auth-progress', (event) => callback(event.payload));

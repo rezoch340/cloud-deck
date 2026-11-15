@@ -495,6 +495,8 @@ pub struct Snapshot {
     pub events: Vec<Event>,
     pub data_directory: String,
     pub mode: String,
+    pub version: String,
+    pub update: crate::update::UpdateStatus,
 }
 
 #[cfg(test)]

@@ -7,11 +7,15 @@ import {
   instanceRegion,
   mayLeaveAccount,
   newDraft,
+  updateSummary,
   validateRecipe,
 } from './domain.ts';
 import type { Recipe, Snapshot } from './domain.ts';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { manifestRecipe, parseApplicationManifest } from './manifest.ts';
+import { normalizeReleaseVersion, syncClientVersion } from '../scripts/sync-version.mjs';
 
 const builtin: Recipe = manifestRecipe(
   parseApplicationManifest(
@@ -33,6 +37,14 @@ const snapshot = (): Snapshot => ({
   events: [],
   mode: 'preview',
   dataDirectory: 'test',
+  version: '0.1.0',
+  update: {
+    status: 'idle',
+    currentVersion: '0.1.0',
+    releaseUrl: 'https://github.com/rezoch340/cloud-deck/releases',
+    canSelfUpdate: false,
+    installMode: 'macos_bundle',
+  },
   runtime: {
     connection: 'not_connected',
     synchronization: 'unobserved',
@@ -181,4 +193,62 @@ test('configuration input rejects directory traversal and invalid command bytes'
     validateRecipe({ ...draft, healthPath: '//other-host/path' }, [builtin]) || '',
     /健康检查/,
   );
+});
+
+test('update summary distinguishes self-updatable Windows NSIS builds from manual download bundles', () => {
+  const baseUpdate = snapshot().update;
+  assert.equal(updateSummary(baseUpdate).badge.label, '尚未检查');
+  assert.match(updateSummary(baseUpdate).modeLabel, /macOS/);
+
+  const nsisAvailable = updateSummary({
+    ...baseUpdate,
+    status: 'available',
+    latestVersion: '0.2.0',
+    canSelfUpdate: true,
+    installMode: 'windows_nsis',
+  });
+  assert.equal(nsisAvailable.badge.label, '发现新版本 v0.2.0');
+  assert.equal(nsisAvailable.badge.tone, 'accent');
+  assert.match(nsisAvailable.modeLabel, /自动覆盖更新/);
+
+  assert.equal(updateSummary({ ...baseUpdate, status: 'up_to_date' }).badge.label, '已是最新版本');
+  assert.equal(
+    updateSummary({ ...baseUpdate, status: 'no_release' }).badge.label,
+    '暂无已发布版本',
+  );
+});
+
+test('sync-version normalizes release tags and keeps all four client manifests consistent', () => {
+  assert.equal(normalizeReleaseVersion('refs/tags/v1.4.2'), '1.4.2');
+  assert.equal(normalizeReleaseVersion('v0.2.0-rc.1'), '0.2.0-rc.1');
+  assert.throws(() => normalizeReleaseVersion('invalid-tag'), /版本号格式无效/);
+
+  const tempBase = process.env.TMPDIR || os.tmpdir();
+  const fixtureRoot = mkdtempSync(path.join(tempBase, 'cloud-deck-version-test-'));
+  try {
+    mkdirSync(path.join(fixtureRoot, 'src-tauri'), { recursive: true });
+    writeFileSync(
+      path.join(fixtureRoot, 'package.json'),
+      JSON.stringify({ name: 'cloud-deck-client', version: '0.1.0' }, null, 2),
+    );
+    writeFileSync(
+      path.join(fixtureRoot, 'src-tauri/tauri.conf.json'),
+      JSON.stringify({ productName: 'Cloud Deck', version: '0.1.0' }, null, 2),
+    );
+    writeFileSync(
+      path.join(fixtureRoot, 'src-tauri/Cargo.toml'),
+      '[package]\nname = "cloud-deck"\nversion = "0.1.0"\nedition = "2021"\n',
+    );
+    writeFileSync(
+      path.join(fixtureRoot, 'src-tauri/Cargo.lock'),
+      '[[package]]\nname = "cloud-deck"\nversion = "0.1.0"\n',
+    );
+
+    const synced = syncClientVersion(fixtureRoot, 'v0.3.1');
+    assert.equal(synced, '0.3.1');
+    assert.equal(syncClientVersion(fixtureRoot, '0.3.1', true), '0.3.1');
+    assert.throws(() => syncClientVersion(fixtureRoot, '0.3.2', true), /不一致/);
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true });
+  }
 });

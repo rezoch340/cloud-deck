@@ -1,10 +1,10 @@
 # Cloud Deck 客户端
 
-Tauri 2 + React 19 / TypeScript，界面使用 HeroUI v3 + Tailwind CSS v4。Windows 与 macOS 共用应用配置、状态模型和页面；目前只在 Apple Silicon Mac 验证过真实窗口，Windows 尚未编译或实机验证。
+Tauri 2 + React 19 / TypeScript，界面使用 HeroUI v3 + Tailwind CSS v4。Windows 与 macOS 共用应用配置、状态模型和页面；目前只在 Apple Silicon Mac 验证过真实窗口，GitHub Actions 已配置 Windows x64（NSIS 安装包与便携版）自动构建（本地亦已通过 Windows x64 交叉编译打包），macOS 包继续在本机自行构建，Windows 实机运行仍待验收。
 
 ## 当前可用范围
 
-- 五个页面：工作台、应用、文件与同步、活动记录、设置。固定窗口框架，内容区内部滚动；表单、卡片、编辑器和外框共用组件。
+- 五个页面：工作台、应用、文件与同步、活动记录、设置。固定窗口框架，内容区内部滚动；表单、卡片、编辑器和外框共用组件。Windows WebView2 视图启用自定义透明轨道胶囊细滚动条并设置 `scrollbar-gutter: stable` 补偿右侧内边距，避免默认灰底箭头滚动条与页头右侧按钮错位。
 - 原生后端实现系统浏览器 Google OAuth：账号选择、PKCE、state、nonce、ID Token 校验、取消/超时、授权刷新。refresh token 留在 macOS Keychain / Windows Credential Manager，不交给前端。
 - 已登录账号可手动刷新 Colab 用量与实例只读状态。读取失败保留错误和历史观测，不能解释为零余额、已关机或停止计费。查询确认无实例且计费为零后才允许退出或切换账号。
 - 自定义脚本任务、Web 服务配置可添加、编辑、移除并原子保存。保存配置不执行命令，也不申请实例。
@@ -180,7 +180,7 @@ node client/scripts/run.mjs live-check --shutdown --keep-open
 读取已脱敏的地区历史记录做离线原生显示检查：
 
 ```bash
-node client/scripts/run.mjs native-check --region-fixture /Volumes/VoltDrive/AI/artifacts/cloud-deck/instance-region-evidence.json
+node client/scripts/run.mjs native-check --region-fixture <脱敏地区记录.json>
 ```
 
 该入口仍禁用 Google 与授权存储，只读取公开实例元数据，检查地区和“上次分配地区”标签，不重新申请机器。
@@ -212,6 +212,13 @@ args = ["--mcp-stdio"]
 
 申请、释放实例和登录 Google 只能在窗口里完成，MCP 不提供这些工具；部署应用前需要先在界面开机并连接实例。服务只接受带正确令牌的本机请求，带 `Origin` 头的浏览器请求一律拒绝。
 
+## 版本发布与客户端更新
+
+- 版本号同步：`node client/scripts/sync-version.mjs <version> [--check]` 统一校验并写入 `client/package.json`、`client/src-tauri/tauri.conf.json`、`client/src-tauri/Cargo.toml` 与 `client/src-tauri/Cargo.lock` 四个文件（自动剥离 `refs/tags/` 与前导 `v`）。
+- 自动发版工作流：[Release Workflow](../.github/workflows/release.yml) 在推送 `v*` 标签时运行前后端测试，构建 `CloudDeck-<ver>-windows-x64-setup.exe`（NSIS 安装包）与 `CloudDeck-<ver>-windows-x64-portable.zip`（便携版），生成 `SHA256SUMS.txt` 并发布 GitHub Release（macOS 包由本机自行签名构建，暂不纳入 CI）；`workflow_dispatch` 手动触发时仅上传构建产物用于演练，不创建正式 Release。
+- 客户端更新机制（`src-tauri/src/update.rs`）：暴露 `check_update`、`install_update`、`open_release_page` 三个 Tauri 命令。仅接受 HTTPS 与 GitHub 官方允许域名，跳过草稿与预发布版本，并通过 `SemVer` 比对当前版本与最新稳定版本。
+- 安装形态与升级行为：在 Windows 下通过主程序同目录是否存在 `uninstall.exe` 区分 `windows_nsis`（NSIS 安装版）与 `windows_portable`（便携版）；macOS 为 `macos_bundle`。NSIS 安装版会拉取同版本 `SHA256SUMS.txt` 与安装程序（限制体积上限），在本地完成常量时间 SHA-256 核验后退出当前进程并以 `/P /UPDATE /R` 启动安装器完成覆盖升级并自动重启；便携版与 macOS 引导在系统浏览器打开对应 Release 页面下载替换。启动桌面客户端 3 秒后自动后台检查一次，设置环境变量 `CLOUD_DECK_AUTO_UPDATE_CHECK=0` 可禁用启动自动检查。
+
 ## 主要源码
 
 - `src/components/`：HeroUI 适配控件、应用编辑器与窗口外框。
@@ -221,8 +228,9 @@ args = ["--mcp-stdio"]
 - `src-tauri/src/cloud.rs` / `transport.rs`：实例接入、Drive 挂载、守护进程部署、原生 SSH 和回环转发。
 - `src-tauri/src/model.rs` / `lib.rs`：持久化、账号保护和原生命令。
 - `src-tauri/src/mcp.rs` / `mcp_bridge.rs`：本机 MCP 服务和 `--mcp-stdio` 桥接。
+- `src-tauri/src/update.rs`：GitHub Releases 检测、域名与 SHA-256 校验下载及 Windows NSIS 自更新。
 - `applications/comfyui/`：普通应用包；清单定义资源、同步和命令，setup.py/start.sh 处理自身安装与启动。
-- `scripts/run.mjs`：依赖、构建、缓存和原生验证的统一入口。
+- `scripts/run.mjs` / `sync-version.mjs`：外置工作根构建验证入口与四处版本号同步工具。
 
 项目 `auth/` 是旧控制器的私有授权目录；新客户端不读取或覆盖它，打包也不包含它。不要打印、提交、上传或附带任何个人授权资料。
 

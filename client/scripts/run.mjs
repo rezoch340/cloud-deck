@@ -32,14 +32,23 @@ linkDirectory(path.join(project, 'src-tauri/gen'), path.join(build, 'gen'));
 linkDirectory(path.join(project, 'src-tauri/icons'), path.join(build, 'icons'));
 linkDirectory(path.join(project, 'node_modules'), path.join(build, 'node_modules'));
 const host = process.platform === 'darwin' ? `${process.arch === 'arm64' ? 'aarch64' : 'x86_64'}-apple-darwin` : `${process.arch === 'arm64' ? 'aarch64' : 'x86_64'}-pc-windows-msvc`;
-const rustBin = process.env.CLOUD_DECK_RUST_BIN || path.join(os.homedir(), '.rustup/toolchains', `stable-${host}`, 'bin');
+const toolchainHome = process.env.RUSTUP_HOME || path.join(os.homedir(), '.rustup');
+const defaultRustBin = path.join(toolchainHome, 'toolchains', `stable-${host}`, 'bin');
+let detectedCargoDir = '';
+if (!process.env.CLOUD_DECK_RUST_BIN && !fs.existsSync(defaultRustBin)) {
+  const lookup = spawnSync(process.platform === 'win32' ? 'where.exe' : 'which', ['cargo'], { encoding: 'utf8' });
+  const firstLine = (lookup.stdout || '').trim().split(/\r?\n/)[0];
+  if (firstLine && fs.existsSync(firstLine)) detectedCargoDir = path.dirname(firstLine);
+}
+const rustBin = process.env.CLOUD_DECK_RUST_BIN || detectedCargoDir || defaultRustBin;
 const exe = process.platform === 'win32' ? '.exe' : '';
 const env = {
   ...process.env,
   CLOUD_DECK_BUILD_ROOT: build,
   CLOUD_DECK_DATA_DIR: process.env.CLOUD_DECK_DATA_DIR || path.join(workRoot, 'data/cloud-deck/client'),
-  CARGO_HOME: path.join(cache, 'cargo'), CARGO_TARGET_DIR: path.join(build, 'target'),
-  RUSTUP_HOME: path.join(cache, 'rustup'), RUSTC: path.join(rustBin, `rustc${exe}`), RUSTDOC: path.join(rustBin, `rustdoc${exe}`),
+  // 本机默认将 Cargo / Rustup 缓存固定在外置卷；CI 显式传入环境变量时保留既有工具链目录以便跨架构编译。
+  CARGO_HOME: process.env.CARGO_HOME || path.join(cache, 'cargo'), CARGO_TARGET_DIR: path.join(build, 'target'),
+  RUSTUP_HOME: process.env.RUSTUP_HOME || path.join(cache, 'rustup'), RUSTC: path.join(rustBin, `rustc${exe}`), RUSTDOC: path.join(rustBin, `rustdoc${exe}`),
   NPM_CONFIG_CACHE: path.join(cache, 'npm'), PNPM_HOME: path.join(cache, 'pnpm'),
   XDG_CACHE_HOME: path.join(cache, 'xdg'), XDG_DATA_HOME: path.join(workRoot, 'data/xdg'), XDG_STATE_HOME: path.join(workRoot, 'data/xdg-state'),
   CLANG_MODULE_CACHE_PATH: path.join(cache, 'clang'), TAURI_CACHE_DIR: path.join(cache, 'tauri'),
@@ -92,6 +101,9 @@ function packageManager() {
       if (name.endsWith('.cmd')) {
         const script = path.join(directory, 'node_modules/pnpm/bin/pnpm.cjs');
         if (fs.existsSync(script)) return script;
+        const corepackScript = path.join(directory, 'node_modules/corepack/dist/pnpm.js');
+        if (fs.existsSync(corepackScript)) return corepackScript;
+        return candidate;
       } else return fs.realpathSync(candidate);
     }
   }
@@ -105,6 +117,7 @@ if (mode === 'install') {
   const manager = packageManager();
   const args = ['install', '--store-dir', path.join(cache, 'pnpm/store'), '--modules-dir', path.join(build, 'node_modules'), '--ignore-scripts', extra.includes('--update-lockfile') ? '--no-frozen-lockfile' : '--frozen-lockfile'];
   if (/\.(cjs|mjs|js)$/.test(manager)) run(process.execPath, [manager, ...args]);
+  else if (process.platform === 'win32' && /\.cmd$/i.test(manager)) run(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', manager, ...args]);
   else run(manager, args);
 } else if (mode === 'dev') run(process.execPath, [moduleFile('vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '18774', '--strictPort']);
 else if (mode === 'web-build') webBuild();
