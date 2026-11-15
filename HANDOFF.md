@@ -1,8 +1,8 @@
 # Cloud Deck · 新 session 接手说明
 
 更新时间：2026-11-14
-正式项目：`/Users/lpitiless/Documents/project/cloud-deck`
-原项目：`/Users/lpitiless/Documents/remote-ssh/ComfyUI-colab`
+正式项目：本仓库根目录（`.`）
+原项目：`../../remote-ssh/ComfyUI-colab`（相对本仓库根目录）
 
 ## 当前修订：云端会话活动与所有应用的实时日志（2026-11-14，离线通过，真实验证暂缓）
 
@@ -135,7 +135,7 @@
 - Claude Desktop 会话 ID：`local_71a7dbb9-89ee-4a7c-88dd-f542dd876e14`
 - 会话标题：Google Gemini 20x 会员附赠的 Colab
 - 桌面会话链接：claude://claude.ai/epitaxy/local_71a7dbb9-89ee-4a7c-88dd-f542dd876e14
-- 本机原始 transcript：`/Users/lpitiless/.claude/projects/-Users-lpitiless-Documents-remote-ssh/958c5223-a22b-4284-9b60-8fbb97e10036.jsonl`
+- 本机原始 transcript：`~/.claude/projects/<原项目会话目录>/958c5223-a22b-4284-9b60-8fbb97e10036.jsonl`
 
 本文件是接手摘要，不是完整会话导出。原始 transcript 仍在原位置；读取时按需搜索和分段，不要把整份日志或其中的凭据直接输出。可通过会话工具读取桌面会话内容；`get_session` 只返回元数据，内容需要相应的事件/转录工具。
 
@@ -164,7 +164,7 @@
 
 用户先要求把现有 ComfyUI 专用控制器通用化，未来支持 Windows，并明确“先出设计稿”。随后补充：“其实不用外部的 ssh 了直接内部管理就好了没必要外部了”。
 
-通用设计稿交付后，用户要求：“去我的 /Users/lpitiless/Documents/project 开正式项目，给这的全复制过去”，并表示会自己在新项目开启 session，再读取当前会话。
+通用设计稿交付后，用户要求：“去我的 ~/Documents/project 开正式项目，给这的全复制过去”，并表示会自己在新项目开启 session，再读取当前会话。
 
 本次完成的是正式项目复制与交接。不要因为读取本文件就自动申请/关闭实例、启动跨平台重写或新建其他 session；按用户在新 session 的下一条指令推进。
 
