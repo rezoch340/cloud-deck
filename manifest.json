@@ -1,0 +1,437 @@
+{
+  "bundle_id": "comfyui-v0.30.0-nodes34-nodlss",
+  "comfyui": {
+    "repository": "https://github.com/Comfy-Org/ComfyUI",
+    "commit": "b1693ecba9f5b65f8c80ab36b195ab963ec92413",
+    "version": "0.30.0"
+  },
+  "plugins": [
+    {
+      "directory": "ComfyLiterals",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/M1kep/ComfyLiterals",
+      "commit": "bdddb08ca82d90d75d97b1d437a652e0284a32ac"
+    },
+    {
+      "directory": "ComfyUI-0246.disabled",
+      "disabled": true,
+      "source": "git",
+      "repository": "https://github.com/Trung0246/ComfyUI-0246",
+      "commit": "d09cb3fe8266e4731316955a99c28dd721ee26cd"
+    },
+    {
+      "directory": "ComfyUI-Crystools",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/crystian/ComfyUI-Crystools/1.27.4/node.zip",
+      "version": "1.27.4",
+      "dependencies": [
+        "deepdiff",
+        "torch",
+        "numpy",
+        "Pillow",
+        "pynvml",
+        "py-cpuinfo"
+      ]
+    },
+    {
+      "directory": "ComfyUI-Manager",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/Comfy-Org/ComfyUI-Manager",
+      "commit": "00a5115267378c75f3eb52dc21a07099722a9922"
+    },
+    {
+      "directory": "ComfyUI-PainterI2V",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/princepainter/ComfyUI-PainterI2V",
+      "commit": "c46e480c35d9a54e70139e354b1fc2975d0b6805"
+    },
+    {
+      "directory": "ComfyUI-QwenVL",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/1038lab/ComfyUI-QwenVL",
+      "commit": "c522c43b15618a4d5c92b2500105ee2a65527f95"
+    },
+    {
+      "directory": "ComfyUI-WanMoeKSampler",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/stduhpf/ComfyUI-WanMoeKSampler",
+      "commit": "ee8fa8ffb356dc5d9f456a0cdb211e60e543cb59"
+    },
+    {
+      "directory": "ComfyUI-WanVideoWrapper",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/kijai/ComfyUI-WanVideoWrapper/1.3.7/node.zip",
+      "version": "1.3.7",
+      "dependencies": [
+        "accelerate >= 1.2.1",
+        "diffusers >= 0.33.0",
+        "peft >= 0.17.0",
+        "ftfy",
+        "gguf >= 0.17.1",
+        "pyloudnorm"
+      ]
+    },
+    {
+      "directory": "ComfyUI-llama-cpp_vlm",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/lihaoyun6/ComfyUI-llama-cpp_vlm",
+      "commit": "52faab1d1c5eb1bb64fd65c09a73da6ed65caec5"
+    },
+    {
+      "directory": "ComfyUI_Comfyroll_CustomNodes",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes",
+      "commit": "d78b780ae43fcf8c6b7c6505e6ffb4584281ceca"
+    },
+    {
+      "directory": "Comfyui-Memory_Cleanup",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/LAOGOU-666/Comfyui-Memory_Cleanup",
+      "commit": "58de13a6090e04408e343501ff8902c034d9f518"
+    },
+    {
+      "directory": "cg-use-everywhere",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/chrisgoringe/cg-use-everywhere/7.3.0/node.zip",
+      "version": "7.3.0",
+      "dependencies": []
+    },
+    {
+      "directory": "comfy-mtb",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/mel/comfy-mtb/0.5.4/node.zip",
+      "version": "0.5.4",
+      "dependencies": [
+        "qrcode",
+        "cachetools",
+        "onnxruntime-gpu",
+        "requirements-parserx",
+        "rembg",
+        "imageio_ffmpeg",
+        "rich",
+        "rich_argparse",
+        "matplotlib",
+        "pillow"
+      ]
+    },
+    {
+      "directory": "comfyui-animatediff-evolved",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/kosinkadink/comfyui-animatediff-evolved/1.5.6/node.zip",
+      "version": "1.5.6",
+      "dependencies": []
+    },
+    {
+      "directory": "comfyui-cogvideoxwrapper",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/kijai/comfyui-cogvideoxwrapper/1.5.1/node.zip",
+      "version": "1.5.1",
+      "dependencies": [
+        "huggingface_hub",
+        "diffusers>=0.31.0",
+        "accelerate>=0.33.0"
+      ]
+    },
+    {
+      "directory": "comfyui-custom-scripts",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/pythongosssss/comfyui-custom-scripts/1.2.5/node.zip",
+      "version": "1.2.5",
+      "dependencies": []
+    },
+    {
+      "directory": "comfyui-easy-use",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/yolain/comfyui-easy-use/1.3.4/node.zip",
+      "version": "1.3.4",
+      "dependencies": [
+        "diffusers",
+        "accelerate",
+        "clip_interrogator>=0.6.0",
+        "sentencepiece",
+        "lark",
+        "onnxruntime",
+        "spandrel",
+        "opencv-python-headless",
+        "matplotlib",
+        "peft"
+      ]
+    },
+    {
+      "directory": "comfyui-florence2",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/kijai/comfyui-florence2/1.0.6/node.zip",
+      "version": "1.0.6",
+      "dependencies": [
+        "transformers>=4.39.0,!=4.50.*"
+      ]
+    },
+    {
+      "directory": "comfyui-frame-interpolation",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/fannovel16/comfyui-frame-interpolation/1.0.7/node.zip",
+      "version": "1.0.7",
+      "dependencies": []
+    },
+    {
+      "directory": "comfyui-impact-pack",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/drltdata/comfyui-impact-pack/8.25.1/node.zip",
+      "version": "8.25.1",
+      "dependencies": [
+        "segment-anything",
+        "scikit-image",
+        "piexif",
+        "transformers",
+        "opencv-python-headless",
+        "GitPython",
+        "scipy>=1.11.4"
+      ]
+    },
+    {
+      "directory": "comfyui-inpaint-cropandstitch",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/lquesada/comfyui-inpaint-cropandstitch/2.1.7/node.zip",
+      "version": "2.1.7",
+      "dependencies": []
+    },
+    {
+      "directory": "comfyui-kjnodes",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/kijai/ComfyUI-KJNodes",
+      "commit": "3f20054214fec9f9234fd3841ae6f1e4287948f6"
+    },
+    {
+      "directory": "comfyui-mixlab-nodes",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/shadow/comfyui-mixlab-nodes/0.46.0/node.tar.gz",
+      "version": "0.46.0",
+      "dependencies": [
+        "numpy",
+        "pyOpenSSL",
+        "watchdog",
+        "opencv-python-headless",
+        "matplotlib",
+        "openai",
+        "simple-lama-inpainting",
+        "clip-interrogator==0.6.0",
+        "transformers>=4.36.0",
+        "lark-parser",
+        "imageio-ffmpeg",
+        "rembg[gpu]",
+        "omegaconf==2.3.0",
+        "Pillow>=9.5.0",
+        "einops==0.7.0",
+        "trimesh>=4.0.5",
+        "huggingface-hub",
+        "scikit-image"
+      ]
+    },
+    {
+      "directory": "comfyui-mxtoolkit",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/smirnov/comfyui-mxtoolkit/0.9.92/node.zip",
+      "version": "0.9.92",
+      "dependencies": []
+    },
+    {
+      "directory": "comfyui-videohelpersuite",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/kosinkadink/comfyui-videohelpersuite/1.7.7/node.zip",
+      "version": "1.7.7",
+      "dependencies": [
+        "opencv-python",
+        "imageio-ffmpeg"
+      ]
+    },
+    {
+      "directory": "comfyui-wd14-tagger",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/pythongosssss/comfyui-wd14-tagger/1.0.1/node.zip",
+      "version": "1.0.1",
+      "dependencies": [
+        "onnxruntime"
+      ]
+    },
+    {
+      "directory": "comfyui_controlnet_aux",
+      "disabled": false,
+      "source": "git",
+      "repository": "https://github.com/Fannovel16/comfyui_controlnet_aux",
+      "commit": "cc6b232f4a47f0cdf70f4e1bfa24b74bd0d75bf1"
+    },
+    {
+      "directory": "comfyui_custom_nodes_alekpet",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/alekpet/comfyui_custom_nodes_alekpet/1.0.88/node.zip",
+      "version": "1.0.88",
+      "dependencies": []
+    },
+    {
+      "directory": "comfyui_essentials",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/matteo/comfyui_essentials/1.1.0/node.tar.gz",
+      "version": "1.1.0",
+      "dependencies": [
+        "numba",
+        "colour-science",
+        "rembg",
+        "pixeloe"
+      ]
+    },
+    {
+      "directory": "comfyui_layerstyle",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/chflame163/comfyui_layerstyle/1.0.90/node.tar.gz",
+      "version": "1.0.90",
+      "dependencies": [
+        "numpy",
+        "pillow",
+        "torch",
+        "matplotlib",
+        "Scipy",
+        "scikit_image",
+        "scikit_learn",
+        "opencv-contrib-python",
+        "pymatting",
+        "segment_anything",
+        "timm",
+        "addict",
+        "yapf",
+        "colour-science",
+        "wget",
+        "mediapipe",
+        "loguru",
+        "typer_config",
+        "fastapi",
+        "rich",
+        "google-generativeai",
+        "diffusers",
+        "omegaconf",
+        "tqdm",
+        "transformers",
+        "kornia",
+        "image-reward",
+        "ultralytics",
+        "blend_modes",
+        "blind-watermark",
+        "qrcode",
+        "pyzbar",
+        "transparent-background",
+        "huggingface_hub",
+        "accelerate",
+        "bitsandbytes",
+        "torchscale",
+        "wandb",
+        "hydra-core",
+        "psd-tools",
+        "inference-cli[yolo-world]",
+        "inference-gpu[yolo-world]",
+        "onnxruntime",
+        "peft",
+        "iopath"
+      ]
+    },
+    {
+      "directory": "comfyui_ultimatesdupscale",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/ssit/comfyui_ultimatesdupscale/1.5.1/node.zip",
+      "version": "1.5.1",
+      "dependencies": []
+    },
+    {
+      "directory": "derfuu_comfyui_moddednodes",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/derfuu/derfuu_comfyui_moddednodes/1.0.1/node.tar.gz",
+      "version": "1.0.1",
+      "dependencies": []
+    },
+    {
+      "directory": "rgthree-comfy",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/rgthree/rgthree-comfy/1.0.2510052058/node.zip",
+      "version": "1.0.2510052058",
+      "dependencies": []
+    },
+    {
+      "directory": "was-ns",
+      "disabled": false,
+      "source": "archive",
+      "download_url": "https://cdn.comfy.org/drltdata/was-ns/3.0.1/node.zip",
+      "version": "3.0.1",
+      "dependencies": [
+        "cmake",
+        "fairscale>=0.4.4",
+        "git+https://github.com/ltdrdata/img2texture.git",
+        "git+https://github.com/ltdrdata/cstr",
+        "gitpython",
+        "imageio",
+        "joblib",
+        "matplotlib",
+        "numba>=0.62",
+        "numpy",
+        "opencv-python-headless[ffmpeg]<=4.7.0.72",
+        "pilgram",
+        "git+https://github.com/ltdrdata/ffmpy.git",
+        "rembg",
+        "scikit-image>=0.20.0",
+        "scikit-learn",
+        "scipy",
+        "timm>=0.4.12",
+        "tqdm",
+        "transformers"
+      ]
+    }
+  ],
+  "models": [
+    {
+      "path": "checkpoints/waiIllustriousSDXL_v170.safetensors",
+      "url": "https://huggingface.co/LyliaEngine/waiIllustriousSDXL_v170/resolve/main/waiIllustriousSDXL_v170.safetensors",
+      "size": 6938040682,
+      "sha256": "f116b0c78ff441467b0cdc8f1936e1ed18ea31e9997c7b132b1b8db533f0bd04"
+    },
+    {
+      "path": "checkpoints/waiNSFWIllustrious_v140.safetensors",
+      "url": "https://huggingface.co/Ine007/waiNSFWIllustrious_v140/resolve/main/waiNSFWIllustrious_v140.safetensors",
+      "size": 6938040682,
+      "sha256": "bdb59bac77d94ae7a55ff893170f9554c3f349e48a1b73c0c17c0b7c6f4d41a2"
+    },
+    {
+      "path": "upscale_models/2x-AnimeSharpV2_MoSR_Soft.pth",
+      "url": "https://huggingface.co/Kim2091/AnimeSharpV2/resolve/main/2x-AnimeSharpV2_MoSR_Soft.pth",
+      "size": 17324914,
+      "sha256": "141bd9b90c323f84cbeb17b4238f3b27df29fb43aeb09916aa6791d00e9352e4"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+# Local credentials and keys
+auth/
+
+# Generated files
+__pycache__/
+*.py[cod]
+*.app/
+.DS_Store
+
+# Cross-platform client build outputs (physical storage is on the external drive)
+client/node_modules
+client/dist
+client/src-tauri/target
+client/src-tauri/gen
+client/src-tauri/icons
+
+# Local editor configuration
+.claude/

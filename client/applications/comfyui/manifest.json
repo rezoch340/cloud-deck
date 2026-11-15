@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "id": "comfyui",
+  "name": "ComfyUI",
+  "description": "图像与视频创作，使用我们已配置的环境、插件和模型。",
+  "kind": "service",
+  "runtime": {
+    "command": "exec bash \"$CLOUD_DECK_APP_DIR/start.sh\"",
+    "workingDirectory": "/opt/ComfyUI",
+    "environment": {},
+    "remotePort": 8188,
+    "localPort": 18188,
+    "readiness": {
+      "type": "http",
+      "url": "http://127.0.0.1:8188/system_stats",
+      "status": 200,
+      "timeoutSeconds": 180,
+      "intervalSeconds": 2,
+      "probeTimeoutSeconds": 5
+    }
+  },
+  "resources": {
+    "files": [
+      {
+        "target": "/opt/comfy-models/checkpoints/waiIllustriousSDXL_v170.safetensors",
+        "size": 6938040682,
+        "sha256": "f116b0c78ff441467b0cdc8f1936e1ed18ea31e9997c7b132b1b8db533f0bd04",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/LyliaEngine/waiIllustriousSDXL_v170/resolve/main/waiIllustriousSDXL_v170.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/checkpoints/waiIllustriousSDXL_v170.safetensors"
+          }
+        ]
+      },
+      {
+        "target": "/opt/comfy-models/checkpoints/waiNSFWIllustrious_v140.safetensors",
+        "size": 6938040682,
+        "sha256": "bdb59bac77d94ae7a55ff893170f9554c3f349e48a1b73c0c17c0b7c6f4d41a2",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/Ine007/waiNSFWIllustrious_v140/resolve/main/waiNSFWIllustrious_v140.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/checkpoints/waiNSFWIllustrious_v140.safetensors"
+          }
+        ]
+      },
+      {
+        "target": "/opt/comfy-models/upscale_models/2x-AnimeSharpV2_MoSR_Soft.pth",
+        "size": 17324914,
+        "sha256": "141bd9b90c323f84cbeb17b4238f3b27df29fb43aeb09916aa6791d00e9352e4",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/Kim2091/AnimeSharpV2/resolve/main/2x-AnimeSharpV2_MoSR_Soft.pth"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/upscale_models/2x-AnimeSharpV2_MoSR_Soft.pth"
+          }
+        ]
+      }
+    ]
+  },
+  "startup": {
+    "restore": [
+      {
+        "source": "/content/drive/MyDrive/ComfyUI_Cloud/user",
+        "target": "/opt/comfy-local/user",
+        "optional": true
+      },
+      {
+        "source": "/content/drive/MyDrive/ComfyUI_Cloud/input",
+        "target": "/opt/comfy-local/input",
+        "optional": true
+      },
+      {
+        "source": "/content/drive/MyDrive/ComfyUI_Cloud/output",
+        "target": "/opt/comfy-local/output",
+        "optional": true
+      },
+      {
+        "source": "/content/drive/MyDrive/ComfyUI_Cloud/models",
+        "target": "/opt/comfy-models",
+        "optional": true
+      }
+    ],
+    "commands": [
+      {
+        "command": "python3 \"$CLOUD_DECK_APP_DIR/setup.py\"",
+        "workingDirectory": "/"
+      }
+    ]
+  },
+  "shutdown": {
+    "save": [
+      {
+        "source": "/opt/comfy-local/user",
+        "target": "/content/drive/MyDrive/ComfyUI_Cloud/user"
+      },
+      {
+        "source": "/opt/comfy-local/input",
+        "target": "/content/drive/MyDrive/ComfyUI_Cloud/input"
+      },
+      {
+        "source": "/opt/comfy-local/output",
+        "target": "/content/drive/MyDrive/ComfyUI_Cloud/output"
+      }
+    ]
+  },
+  "details": "## 环境说明\n\n**ComfyUI 0.30.0**，包含 34 项插件记录（33 项启用），不安装 DLSS。\n\n三个模型优先外部下载，失败后尝试 Google Drive；启动恢复用户文件，保存时同步 user、input 和 output。\n\n以下为应用作者提供的配置说明；实际运行与同步状态请查看上方状态。\n\n### 固定插件\n\n| 组件 | 固定版本 / 提交 | 配置 |\n| --- | --- | --- |\n| ComfyLiterals | `bdddb08ca82d` | 启用 |\n| ComfyUI-0246.disabled | `d09cb3fe8266` | 禁用 |\n| ComfyUI-Crystools | `1.27.4` | 启用 |\n| ComfyUI-Manager | `00a511526737` | 启用 |\n| ComfyUI-PainterI2V | `c46e480c35d9` | 启用 |\n| ComfyUI-QwenVL | `c522c43b1561` | 启用 |\n| ComfyUI-WanMoeKSampler | `ee8fa8ffb356` | 启用 |\n| ComfyUI-WanVideoWrapper | `1.3.7` | 启用 |\n| ComfyUI-llama-cpp_vlm | `52faab1d1c5e` | 启用 |\n| ComfyUI_Comfyroll_CustomNodes | `d78b780ae43f` | 启用 |\n| Comfyui-Memory_Cleanup | `58de13a6090e` | 启用 |\n| cg-use-everywhere | `7.3.0` | 启用 |\n| comfy-mtb | `0.5.4` | 启用 |\n| comfyui-animatediff-evolved | `1.5.6` | 启用 |\n| comfyui-cogvideoxwrapper | `1.5.1` | 启用 |\n| comfyui-custom-scripts | `1.2.5` | 启用 |\n| comfyui-easy-use | `1.3.4` | 启用 |\n| comfyui-florence2 | `1.0.6` | 启用 |\n| comfyui-frame-interpolation | `1.0.7` | 启用 |\n| comfyui-impact-pack | `8.25.1` | 启用 |\n| comfyui-inpaint-cropandstitch | `2.1.7` | 启用 |\n| comfyui-kjnodes | `3f20054214fe` | 启用 |\n| comfyui-mixlab-nodes | `0.46.0` | 启用 |\n| comfyui-mxtoolkit | `0.9.92` | 启用 |\n| comfyui-videohelpersuite | `1.7.7` | 启用 |\n| comfyui-wd14-tagger | `1.0.1` | 启用 |\n| comfyui_controlnet_aux | `cc6b232f4a47` | 启用 |\n| comfyui_custom_nodes_alekpet | `1.0.88` | 启用 |\n| comfyui_essentials | `1.1.0` | 启用 |\n| comfyui_layerstyle | `1.0.90` | 启用 |\n| comfyui_ultimatesdupscale | `1.5.1` | 启用 |\n| derfuu_comfyui_moddednodes | `1.0.1` | 启用 |\n| rgthree-comfy | `1.0.2510052058` | 启用 |\n| was-ns | `3.0.1` | 启用 |"
+}

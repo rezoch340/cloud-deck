@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "hello-command",
+  "name": "命令示例",
+  "description": "没有下载和同步，直接执行 Linux 命令。",
+  "kind": "task",
+  "runtime": {
+    "command": "printf 'Hello from Cloud Deck\n'",
+    "workingDirectory": "/",
+    "environment": {},
+    "remotePort": null,
+    "localPort": null,
+    "healthPath": null
+  },
+  "resources": {
+    "files": []
+  },
+  "startup": {
+    "restore": [],
+    "commands": []
+  },
+  "shutdown": {
+    "save": []
+  },
+  "details": "## 命令示例\n\n只执行一条 Linux 命令，不需要下载或同步文件。\n\n| 项目 | 内容 |\n| --- | --- |\n| 运行方式 | 一次性任务 |\n| 预期输出 | Hello from Cloud Deck |"
+}

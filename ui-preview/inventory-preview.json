@@ -1,0 +1,23 @@
+{
+  "preview": true,
+  "root": "Google Drive / ComfyUI_Cloud / models",
+  "observedAt": null,
+  "workflowCount": 64,
+  "files": [
+    {"path": "checkpoints/waiIllustriousSDXL_v170.safetensors", "size": 6938040682},
+    {"path": "checkpoints/waiNSFWIllustrious_v140.safetensors", "size": 6938040682},
+    {"path": "upscale_models/2x-AnimeSharpV2_MoSR_Soft.pth", "size": 17324914}
+  ],
+  "instanceSnapshots": {
+    "copy": {
+      "checkpoints/waiIllustriousSDXL_v170.safetensors": {"status": "ready", "copiedBytes": 6938040682},
+      "checkpoints/waiNSFWIllustrious_v140.safetensors": {"status": "copying", "copiedBytes": 1813143318},
+      "upscale_models/2x-AnimeSharpV2_MoSR_Soft.pth": {"status": "pending", "copiedBytes": 0}
+    },
+    "ready": {
+      "checkpoints/waiIllustriousSDXL_v170.safetensors": {"status": "ready", "copiedBytes": 6938040682},
+      "checkpoints/waiNSFWIllustrious_v140.safetensors": {"status": "ready", "copiedBytes": 6938040682},
+      "upscale_models/2x-AnimeSharpV2_MoSR_Soft.pth": {"status": "ready", "copiedBytes": 17324914}
+    }
+  }
+}
