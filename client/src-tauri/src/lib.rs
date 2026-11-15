@@ -5,11 +5,18 @@ mod connection;
 mod credentials;
 mod drive;
 mod manifest;
+mod mcp;
+mod mcp_bridge;
 mod model;
 #[cfg(feature = "native-smoke")]
 mod native_smoke;
 mod readiness;
 mod transport;
+
+/// `--mcp-stdio` 入口：把 MCP 客户端的标准输入输出转发给正在运行的客户端。
+pub fn mcp_stdio(args: &[String]) -> i32 {
+    mcp_bridge::run(args)
+}
 
 fn smoke_mode() -> bool {
     cfg!(feature = "native-smoke") && std::env::var("CLOUD_DECK_SMOKE").as_deref() == Ok("1")
@@ -863,6 +870,14 @@ pub fn run() {
                 login_url: Arc::new(Mutex::new(None)),
                 cloud: cloud::Cloud::default(),
             });
+            if !smoke_mode()
+                && !live_check_mode()
+                && std::env::var("CLOUD_DECK_MCP").as_deref() != Ok("0")
+            {
+                if let Err(error) = mcp::start(app.handle().clone(), &root) {
+                    eprintln!("Cloud Deck MCP 未启动：{error}");
+                }
+            }
             Ok(())
         })
         .on_page_load(|_webview, _payload| {

@@ -185,6 +185,33 @@ node client/scripts/run.mjs native-check --region-fixture /Volumes/VoltDrive/AI/
 
 该入口仍禁用 Google 与授权存储，只读取公开实例元数据，检查地区和“上次分配地区”标签，不重新申请机器。
 
+## 本机 MCP（第一版）
+
+客户端启动后会在 `127.0.0.1` 的随机端口开一个 MCP 服务，并把地址和随机令牌写进数据目录的 `mcp.json`（权限 0600，每次启动重新生成）。MCP 和窗口共用同一份状态，界面上的变化和 MCP 的操作互相可见。
+
+MCP 客户端通过同一个可执行文件的 `--mcp-stdio` 参数接入，它只负责把标准输入输出转发给正在运行的客户端；客户端没开时会返回明确错误。Codex 配置示例：
+
+```toml
+[mcp_servers.cloud-deck]
+command = "/Applications/Cloud Deck.app/Contents/MacOS/cloud-deck"
+args = ["--mcp-stdio"]
+```
+
+如果客户端使用了 `CLOUD_DECK_DATA_DIR`，桥接也要指向同一个目录：`args = ["--mcp-stdio", "--data-dir", "<数据目录>"]`。设置 `CLOUD_DECK_MCP=0` 可以关闭服务。
+
+第一版提供的工具：
+
+| 工具 | 作用 |
+| --- | --- |
+| `get_workspace` / `refresh_status` | 读取工作区；刷新实例、应用和连接状态 |
+| `get_application` / `get_application_guide` | 读取应用清单；获取清单格式说明和最小示例 |
+| `validate_application` / `save_application` | 校验、保存应用清单（`manifest` 或表单 `draft`） |
+| `remove_application` | 删除应用 |
+| `start_application` | 部署并启动应用，等待就绪、完成或失败（默认 600 秒，最多 1800 秒），失败时附带最近日志 |
+| `stop_application` / `application_logs` | 停止应用；读取应用日志 |
+
+申请、释放实例和登录 Google 只能在窗口里完成，MCP 不提供这些工具；部署应用前需要先在界面开机并连接实例。服务只接受带正确令牌的本机请求，带 `Origin` 头的浏览器请求一律拒绝。
+
 ## 主要源码
 
 - `src/components/`：HeroUI 适配控件、应用编辑器与窗口外框。
@@ -193,6 +220,7 @@ node client/scripts/run.mjs native-check --region-fixture /Volumes/VoltDrive/AI/
 - `src-tauri/src/auth.rs`：系统浏览器 OAuth、安全存储与只读查询。
 - `src-tauri/src/cloud.rs` / `transport.rs`：实例接入、Drive 挂载、守护进程部署、原生 SSH 和回环转发。
 - `src-tauri/src/model.rs` / `lib.rs`：持久化、账号保护和原生命令。
+- `src-tauri/src/mcp.rs` / `mcp_bridge.rs`：本机 MCP 服务和 `--mcp-stdio` 桥接。
 - `applications/comfyui/`：普通应用包；清单定义资源、同步和命令，setup.py/start.sh 处理自身安装与启动。
 - `scripts/run.mjs`：依赖、构建、缓存和原生验证的统一入口。
 

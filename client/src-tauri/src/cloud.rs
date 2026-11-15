@@ -440,13 +440,12 @@ impl Cloud {
         }
         let ready_message = connection.awaiting_ready.as_ref().and_then(|id| {
             let app = apps.iter().find(|app| &app.id == id)?;
-            if app.kind == "service" && app.health_path.is_some() {
-                urls.contains_key(id)
-                    .then_some("应用已就绪，健康检查通过。")
-            } else {
-                (states.get(id).map(String::as_str) == Some("running"))
-                    .then_some("应用已就绪，进程正在运行。")
-            }
+            awaiting_outcome(
+                &app.kind,
+                app.health_path.is_some(),
+                states.get(id).map(String::as_str),
+                urls.contains_key(id),
+            )
         });
         if ready_message.is_some() {
             connection.awaiting_ready = None;
@@ -995,6 +994,24 @@ fn can_release_empty(created_here: bool, wrote_data: bool, agent: &Value) -> boo
         && agent["applications"].as_array().is_some_and(Vec::is_empty)
 }
 
+fn awaiting_outcome(
+    kind: &str,
+    has_health_check: bool,
+    state: Option<&str>,
+    healthy: bool,
+) -> Option<&'static str> {
+    match state {
+        Some("failed") => Some("应用启动失败，请查看应用日志中的错误输出。"),
+        Some("stopped") if kind == "task" => Some("任务已结束，退出状态正常。"),
+        Some("stopped") => Some("应用进程已退出，未通过就绪检查；请查看应用日志。"),
+        _ if kind == "service" && has_health_check => {
+            healthy.then_some("应用已就绪，健康检查通过。")
+        }
+        Some("running") => Some("应用已就绪，进程正在运行。"),
+        _ => None,
+    }
+}
+
 pub fn validate_accelerator(accelerator: &str, observation: &Observation) -> Result<(), String> {
     if observation.status != "current" {
         return Err("先刷新并确认账号状态，再启动实例。".into());
@@ -1175,6 +1192,21 @@ mod tests {
         for invalid in ["../other", "kernel/other", "kernel?token=x", ""] {
             assert!(kernel_websocket_url(invalid, "client_456").is_err());
         }
+    }
+    #[test]
+    fn awaiting_ready_settles_on_failure_exit_or_readiness() {
+        assert!(awaiting_outcome("service", true, Some("preparing"), false).is_none());
+        assert!(awaiting_outcome("service", true, Some("running"), false).is_none());
+        assert!(awaiting_outcome("service", true, Some("running"), true)
+            .is_some_and(|message| message.contains("健康检查通过")));
+        assert!(awaiting_outcome("service", true, Some("failed"), false)
+            .is_some_and(|message| message.contains("启动失败")));
+        assert!(awaiting_outcome("service", true, Some("stopped"), false)
+            .is_some_and(|message| message.contains("已退出")));
+        assert!(awaiting_outcome("task", false, Some("stopped"), false)
+            .is_some_and(|message| message.contains("任务已结束")));
+        assert!(awaiting_outcome("task", false, Some("running"), false).is_some());
+        assert!(awaiting_outcome("task", false, None, false).is_none());
     }
     #[test]
     fn successful_agent_start_with_null_error_is_not_a_rejection() {
