@@ -27,6 +27,7 @@ export default function App() {
   const [manifestEditor, setManifestEditor] = useState<{
     manifest: ApplicationManifest;
     readOnly: boolean;
+    editingId: string | null;
   } | null>(null);
   const [draft, setDraft] = useState<RecipeDraft | null>(null);
   const [remove, setRemove] = useState<Recipe | null>(null);
@@ -119,7 +120,7 @@ export default function App() {
   }
   function edit(app: Recipe) {
     if (app.manifest) {
-      setManifestEditor({ manifest: app.manifest, readOnly: app.builtin });
+      setManifestEditor({ manifest: app.manifest, readOnly: app.builtin, editingId: app.id });
       return;
     }
     const { builtin: builtinConfiguration, manifest: manifestMetadata, ...value } = app;
@@ -194,7 +195,11 @@ export default function App() {
             open={open}
             add={add}
             addManifest={() =>
-              setManifestEditor({ manifest: newApplicationManifest(), readOnly: false })
+              setManifestEditor({
+                manifest: newApplicationManifest(),
+                readOnly: false,
+                editingId: null,
+              })
             }
           />
         );
@@ -407,7 +412,7 @@ export default function App() {
           readOnly={manifestEditor.readOnly}
           close={() => setManifestEditor(null)}
           save={async (manifest) => {
-            setSnapshot(await api.saveApplicationManifest(manifest));
+            setSnapshot(await api.saveApplicationManifest(manifest, manifestEditor.editingId));
             setSelected(manifest.id);
             setPage('detail');
             setToast('应用清单已保存。');
