@@ -8,6 +8,7 @@ export function Files({
   app,
   select,
   runtime,
+  lastSaveVerification,
   busy,
   save,
 }: {
@@ -15,12 +16,20 @@ export function Files({
   app: Recipe;
   select: (applicationId: string) => void;
   runtime: Snapshot['runtime'];
+  lastSaveVerification?: Snapshot['lastSaveVerification'];
   busy: boolean;
   save: () => void;
 }) {
   const files = runtime.storage.files?.filter((file) => file.applicationId === app.id) || [];
+  const previous = lastSaveVerification?.storage;
+  const previousFiles = previous?.files?.filter((file) => file.applicationId === app.id) || [];
+  const showPrevious =
+    previousFiles.length > 0 &&
+    (runtime.connection !== 'connected' ||
+      runtime.synchronization !== 'verified' ||
+      previous?.receiptId !== runtime.storage.receiptId);
   const synchronization = {
-    unobserved: '尚未校验',
+    unobserved: '本次未查询',
     pending: '待同步',
     syncing: '正在保存与校验',
     verified: runtime.storage.method === 'no_save_rules' ? '没有待保存文件' : 'Drive 服务端已校验',
@@ -57,7 +66,9 @@ export function Files({
         <p className="text-sm text-muted">
           {runtime.storage.observedAt
             ? `上次观测：${new Date(runtime.storage.observedAt).toLocaleString('zh-CN')}。`
-            : '尚未执行保存校验。'}
+            : runtime.connection === 'connected'
+              ? '当前实例尚未执行保存校验。'
+              : '当前未连接实例，无法查询本次文件状态；这不代表云盘中没有已保存文件。'}
           {runtime.storage.method === 'drive_api_md5'
             ? '逐文件核对 Google Drive 服务端大小与 MD5。'
             : runtime.storage.method === 'no_save_rules'
@@ -98,6 +109,30 @@ export function Files({
           </div>
         )}
       </Panel>
+      {showPrevious && previous && (
+        <Panel title="上次保存记录" actions={<Badge tone="neutral">历史校验记录</Badge>}>
+          <p className="mb-4 text-sm text-muted">
+            {new Date(previous.observedAt!).toLocaleString('zh-CN')}，{previousFiles.length} 个文件
+            · {bytes(previousFiles.reduce((total, file) => total + file.size, 0))}。 当时已通过
+            Drive 服务端大小与 MD5 校验；之后的文件变动需要重新查询。
+          </p>
+          <div
+            className="max-h-80 overflow-y-auto"
+            role="region"
+            aria-label="历史保存文件清单"
+            tabIndex={0}
+          >
+            <DataTable
+              label="上次已校验文件"
+              columns={['文件', '大小', 'SHA-256']}
+              rows={previousFiles.map((file) => ({
+                id: file.path,
+                cells: [file.path, bytes(file.size), <code>{file.sha256.slice(0, 16)}…</code>],
+              }))}
+            />
+          </div>
+        </Panel>
+      )}
       {app.manifest && <ManifestLifecycle app={app} />}
       <Panel title="保存目录">
         <dl className="cd-properties">

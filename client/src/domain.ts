@@ -98,6 +98,11 @@ export interface Snapshot {
   account: Account | null;
   observation: Observation;
   events: Activity[];
+  lastSaveVerification?: {
+    accountSubject: string;
+    endpoint: string;
+    storage: Snapshot['runtime']['storage'];
+  } | null;
   runtime: {
     heartbeat?: {
       status: string;
@@ -114,6 +119,7 @@ export interface Snapshot {
     storage: {
       observedAt?: number;
       method?: string;
+      receiptId?: string;
       fileCount?: number;
       totalBytes?: number;
       error?: string;

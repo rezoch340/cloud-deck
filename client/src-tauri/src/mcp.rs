@@ -462,7 +462,11 @@ fn save(app: &AppHandle, arguments: &Value) -> Result<Value, String> {
         (_, Some(value)) => {
             let requested = value["id"].as_str().map(str::to_owned);
             (
-                crate::save_application_manifest(value.clone(), app.state())?,
+                crate::save_manifest(
+                    value.clone(),
+                    crate::ManifestSaveMode::Upsert,
+                    &app.state::<Backend>(),
+                )?,
                 requested,
             )
         }

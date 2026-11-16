@@ -115,6 +115,12 @@ export async function saveApplication(draft: RecipeDraft) {
   const snapshot = preview();
   const error = validateRecipe(draft, snapshot.apps);
   if (error) throw new Error(error);
+  if (
+    draft.saveDirectories.length > 0 &&
+    draft.storageDirectory !== '/content/drive/MyDrive' &&
+    !draft.storageDirectory.startsWith('/content/drive/MyDrive/')
+  )
+    throw new Error('云盘保存目录必须位于 Google Drive 的 MyDrive 内。');
   if (draft.id && !snapshot.apps.some((application) => application.id === draft.id))
     throw new Error('要修改的应用不存在。');
   const applicationId = draft.id || `app-${crypto.randomUUID()}`;
@@ -140,10 +146,20 @@ export async function saveApplication(draft: RecipeDraft) {
   });
   return persistPreview(snapshot);
 }
-export async function saveApplicationManifest(manifest: ApplicationManifest) {
-  if (desktop) return invoke<Snapshot>('save_application_manifest', { manifest });
+export async function saveApplicationManifest(
+  manifest: ApplicationManifest,
+  editingId: string | null,
+) {
+  if (desktop) return invoke<Snapshot>('save_application_manifest', { manifest, editingId });
   const snapshot = preview();
   const next = manifestRecipe(parseApplicationManifest(JSON.stringify(manifest)));
+  if (editingId !== null && next.id !== editingId) throw new Error('编辑应用清单时不能更改 ID。');
+  const existing = snapshot.apps.some(
+    (application) => application.id === next.id && !application.builtin,
+  );
+  if (editingId === null && existing)
+    throw new Error('应用清单 ID 已存在，请更换 ID 或编辑原有清单。');
+  if (editingId !== null && !existing) throw new Error('要编辑的应用清单不存在。');
   const error = validateRecipe(next, snapshot.apps);
   if (error) throw new Error(error);
   snapshot.apps = [...snapshot.apps.filter((application) => application.id !== next.id), next];

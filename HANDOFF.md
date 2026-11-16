@@ -4,6 +4,16 @@
 正式项目：本仓库根目录（`.`）
 原项目：`../../remote-ssh/ComfyUI-colab`（相对本仓库根目录）
 
+## 2026-11-16：通用创作应用与保存记录
+
+`codex/creator-workflows` 增加可选音频、视频、LLM、工作流分类和筛选，应用卡片可直接打开已就绪的本机入口。SSH 无活动超时从 90 秒延长至 420 秒，覆盖 Drive 交互授权最多 300 秒的等待。清单准备命令默认折叠，避免较大的内嵌安装脚本占满文件页。
+
+文件页将未观测状态标为「本次未查询」。成功的 Drive 服务端校验记录单独落盘，按 Google 账号隔离显示，关机或重启后仍可查看。历史记录不更改实时同步状态，不参与关机放行或零计费判断；旧版本未留存的历史凭证不会补造。
+
+在 Apple Silicon Mac 与一台真实 Colab G4 上完成本人参考音克隆、分段语气配音、Wan2.2 视频、音画合成和 Qwen3 接口生成。文件经 Drive 服务端大小与 MD5 校验，关机后云盘 WAV 与本机 MP4 播放通过，实例数和费率均归零。具体个人素材与账号账单保存在私有工作区。原创工作流组件独立于本仓库，未把无公开许可证的上游源码重新许可。
+
+新增历史记录回归在本机通过，尚未再开 G4 验证该落盘字段。原有端到端链路与这项后补回归分开计。Windows 实机及全部第三方插件仍未验证。
+
 ## 当前分支：Git 标签自动发版、客户端自更新、Windows 滚动条与项目文档重做（2026-11-15，`codex/git-release-updater`）
 
 - 自动发版与版本同步：新增 `.github/workflows/release.yml` 与 `client/scripts/sync-version.mjs`（含 `sync-version.d.mts`），并新增 `.gitattributes` 锁定 LF 行尾以确保 Windows Runner 检出时不会把内嵌至 Rust 二进制的 `start.sh` / Python 云端脚本转为 CRLF。按用户要求，GitHub Actions 发版工作流仅自动构建 Windows x64（`CloudDeck-<ver>-windows-x64-setup.exe` 与 `CloudDeck-<ver>-windows-x64-portable.zip`），同步 `client/package.json`、`client/src-tauri/tauri.conf.json`、`client/src-tauri/Cargo.toml`、`client/src-tauri/Cargo.lock` 四个文件，运行测试并生成 `SHA256SUMS.txt` 后在推送 `v*` 标签时发布 GitHub Release（macOS 应用由本机自行构建；`workflow_dispatch` 仅上传产物演练，不创建正式 Release）。

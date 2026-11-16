@@ -67,6 +67,21 @@ struct Backend {
 }
 
 impl Backend {
+    fn load(path: PathBuf) -> Self {
+        // Read public workspace metadata first; account operations access credentials on demand.
+        let data = Stored::load(&path);
+        Self {
+            path,
+            data: Mutex::new(data),
+            operation: tokio::sync::Mutex::new(()),
+            update_operation: tokio::sync::Mutex::new(()),
+            update: Mutex::new(update::UpdateStatus::initial()),
+            login_cancel: Mutex::new(None),
+            login_url: Arc::new(Mutex::new(None)),
+            cloud: cloud::Cloud::default(),
+        }
+    }
+
     fn snapshot(&self) -> Result<Snapshot, String> {
         let guard = self.data.lock().map_err(|_| "工作空间状态不可用。")?;
         let data = guard.as_ref().map_err(Clone::clone)?;
@@ -77,6 +92,7 @@ impl Backend {
             account: data.account.clone(),
             observation: data.observation.clone(),
             events: data.events.clone(),
+            last_save_verification: data.current_account_save_verification(),
             data_directory: self
                 .path
                 .parent()
@@ -291,25 +307,43 @@ fn save_application(draft: RecipeDraft, backend: State<'_, Backend>) -> Result<S
     backend.snapshot()
 }
 
-#[tauri::command]
-fn save_application_manifest(
+enum ManifestSaveMode<'a> {
+    Create,
+    Edit(&'a str),
+    Upsert,
+}
+
+fn save_manifest(
     manifest: serde_json::Value,
-    backend: State<'_, Backend>,
+    mode: ManifestSaveMode<'_>,
+    backend: &Backend,
 ) -> Result<Snapshot, String> {
     let identifier = manifest["id"]
         .as_str()
         .ok_or("应用清单缺少 id。")?
         .to_owned();
+    if matches!(mode, ManifestSaveMode::Edit(editing_id) if editing_id != identifier) {
+        return Err("编辑应用清单时不能更改 ID。".into());
+    }
     backend.cloud.assert_editable(&identifier)?;
     backend.change(|data| {
+        let existing = data
+            .custom_apps
+            .iter()
+            .position(|application| application.id == identifier);
+        match (mode, existing) {
+            (ManifestSaveMode::Create, Some(_)) => {
+                return Err("应用清单 ID 已存在，请更换 ID 或编辑原有清单。".into());
+            }
+            (ManifestSaveMode::Edit(_), None) => {
+                return Err("要编辑的应用清单不存在。".into());
+            }
+            _ => {}
+        }
         let recipe = manifest::recipe(manifest, &data.apps(), false)?;
         let name = recipe.name.clone();
-        if let Some(existing) = data
-            .custom_apps
-            .iter_mut()
-            .find(|application| application.id == identifier)
-        {
-            *existing = recipe;
+        if let Some(index) = existing {
+            data.custom_apps[index] = recipe;
         } else {
             data.custom_apps.push(recipe);
         }
@@ -321,6 +355,19 @@ fn save_application_manifest(
         Ok(())
     })?;
     backend.snapshot()
+}
+
+#[tauri::command]
+fn save_application_manifest(
+    manifest: serde_json::Value,
+    editing_id: Option<String>,
+    backend: State<'_, Backend>,
+) -> Result<Snapshot, String> {
+    let mode = editing_id
+        .as_deref()
+        .map(ManifestSaveMode::Edit)
+        .unwrap_or(ManifestSaveMode::Create);
+    save_manifest(manifest, mode, &backend)
 }
 
 #[tauri::command]
@@ -573,7 +620,9 @@ fn cloud_result(
 }
 async fn poll_cloud(backend: &Backend) -> Result<(), String> {
     let events = backend.cloud.refresh(&backend.snapshot()?.apps).await?;
+    let runtime = backend.cloud.snapshot(&[])?;
     backend.change(|data| {
+        data.remember_save_verification(&runtime);
         for event in events {
             if !data.events.iter().any(|old| {
                 old.time == event.time
@@ -1015,20 +1064,7 @@ pub fn run() {
                 Some(path) => PathBuf::from(path),
                 None => app.path().app_data_dir()?,
             };
-            let path = root.join("workspace.json");
-            // Window startup uses saved public metadata. Credentials are read lazily
-            // by an explicit account/cloud operation and then cached in memory.
-            let data = Stored::load(&path);
-            app.manage(Backend {
-                path,
-                data: Mutex::new(data),
-                operation: tokio::sync::Mutex::new(()),
-                update_operation: tokio::sync::Mutex::new(()),
-                update: Mutex::new(update::UpdateStatus::initial()),
-                login_cancel: Mutex::new(None),
-                login_url: Arc::new(Mutex::new(None)),
-                cloud: cloud::Cloud::default(),
-            });
+            app.manage(Backend::load(root.join("workspace.json")));
             if !smoke_mode()
                 && !live_check_mode()
                 && std::env::var("CLOUD_DECK_MCP").as_deref() != Ok("0")
@@ -1117,4 +1153,49 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("Cloud Deck could not start");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::{json, Value};
+
+    #[test]
+    fn creating_a_manifest_cannot_overwrite_another_application() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("workspace.json");
+        let backend = Backend::load(path.clone());
+        let manifest: Value =
+            serde_json::from_str(include_str!("../../../examples/command-app/manifest.json"))
+                .unwrap();
+        let id = manifest["id"].as_str().unwrap();
+        save_manifest(manifest.clone(), ManifestSaveMode::Create, &backend).unwrap();
+        let original = std::fs::read(&path).unwrap();
+
+        let mut replacement = manifest.clone();
+        replacement["runtime"]["command"] = json!("printf replacement");
+        let duplicate = save_manifest(replacement.clone(), ManifestSaveMode::Create, &backend);
+        assert!(duplicate.is_err_and(|error| error.contains("ID 已存在")));
+
+        let mut renamed = replacement.clone();
+        renamed["id"] = json!("other-application-id");
+        let changed_id = save_manifest(renamed.clone(), ManifestSaveMode::Edit(id), &backend);
+        assert!(changed_id.is_err_and(|error| error.contains("不能更改 ID")));
+        let missing = save_manifest(
+            renamed,
+            ManifestSaveMode::Edit("other-application-id"),
+            &backend,
+        );
+        assert!(missing.is_err_and(|error| error.contains("不存在")));
+        assert_eq!(std::fs::read(&path).unwrap(), original);
+
+        save_manifest(replacement.clone(), ManifestSaveMode::Edit(id), &backend).unwrap();
+        let stored = Stored::load(&path).unwrap();
+        assert_eq!(stored.custom_apps.len(), 1);
+        assert_eq!(stored.custom_apps[0].manifest.as_ref(), Some(&replacement));
+
+        save_manifest(manifest.clone(), ManifestSaveMode::Upsert, &backend).unwrap();
+        let stored = Stored::load(&path).unwrap();
+        assert_eq!(stored.custom_apps[0].manifest.as_ref(), Some(&manifest));
+    }
 }

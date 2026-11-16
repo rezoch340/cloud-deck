@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { AppKind, Recipe, Snapshot } from '../domain.ts';
 import { ManifestLifecycle } from '../components/ManifestLifecycle.tsx';
 import { ApplicationDescription } from '../components/ApplicationDescription.tsx';
@@ -8,7 +8,24 @@ import { readinessDescription } from '../readiness.ts';
 
 const applicationIcon = (app: Recipe) =>
   app.builtin ? 'node' : app.kind === 'task' ? 'code' : 'service';
-export function ApplicationCard({ app, open }: { app: Recipe; open: (app: Recipe) => void }) {
+const categoryLabels = {
+  audio: '音频',
+  video: '视频',
+  llm: 'LLM',
+  workflow: '工作流',
+  general: '通用',
+};
+export function ApplicationCard({
+  app,
+  open,
+  launch,
+  runtime,
+}: {
+  app: Recipe;
+  open: (app: Recipe) => void;
+  launch?: (id: string) => void;
+  runtime?: Snapshot['runtime'];
+}) {
   return (
     <Panel className="cd-application-card">
       <div className="flex items-center gap-4">
@@ -19,11 +36,15 @@ export function ApplicationCard({ app, open }: { app: Recipe; open: (app: Recipe
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold">{app.name}</h3>
             {app.builtin && <Badge tone="accent">内置配置</Badge>}
+            <Badge>{categoryLabels[app.manifest?.category || 'general']}</Badge>
           </div>
           <p className="mt-1 text-xs text-muted">
             {app.description || (app.kind === 'task' ? '一次性任务' : '长期运行的服务')}
           </p>
         </div>
+        {launch && runtime?.applicationUrls[app.id] && (
+          <Button onPress={() => launch(app.id)}>打开应用</Button>
+        )}
         <Button variant="outline" onPress={() => open(app)}>
           查看配置
           <Icon name="chevron" />
@@ -37,18 +58,41 @@ export function Applications({
   open,
   add,
   addManifest,
+  runtime,
+  launch,
 }: {
   apps: Recipe[];
   open: (app: Recipe) => void;
   add: (kind: AppKind) => void;
   addManifest: () => void;
+  runtime?: Snapshot['runtime'];
+  launch?: (id: string) => void;
 }) {
+  const [category, setCategory] = useState('all');
+  const shown = apps.filter(
+    (app) => category === 'all' || (app.manifest?.category || 'general') === category,
+  );
   return (
     <div className="cd-stack">
-      <div className="cd-stack-sm">
-        {apps.map((app) => (
-          <ApplicationCard key={app.id} app={app} open={open} />
+      <div className="flex flex-wrap gap-2" aria-label="应用分类">
+        {Object.entries({ all: '全部', ...categoryLabels }).map(([value, label]) => (
+          <Button
+            key={value}
+            variant={category === value ? 'primary' : 'outline'}
+            aria-pressed={category === value}
+            onPress={() => setCategory(value)}
+          >
+            {label}
+          </Button>
         ))}
+      </div>
+      <div className="cd-stack-sm">
+        {shown.map((app) => (
+          <ApplicationCard key={app.id} app={app} open={open} launch={launch} runtime={runtime} />
+        ))}
+        {!shown.length && (
+          <p className="text-sm text-muted">此分类还没有应用。可以导入对应的模型应用清单。</p>
+        )}
       </div>
       <div className="cd-two-columns">
         <Panel title="Python / 脚本任务" description="保存一次性任务的命令与产物目录。">

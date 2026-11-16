@@ -118,6 +118,14 @@ pub fn validate(draft: RecipeDraft, current: &[Recipe], id: String) -> Result<Re
     {
         return Err("目录必须是云端 Linux 的绝对路径，不能包含上级目录跳转。".into());
     }
+    if !draft.save_directories.is_empty()
+        && draft.storage_directory != "/content/drive/MyDrive"
+        && !draft
+            .storage_directory
+            .starts_with("/content/drive/MyDrive/")
+    {
+        return Err("云盘保存目录必须位于 Google Drive 的 MyDrive 内。".into());
+    }
     let readiness = crate::readiness::resolve(
         &draft.kind,
         draft.readiness.as_ref(),
@@ -328,6 +336,16 @@ pub struct Stored {
     pub account: Option<Account>,
     pub observation: Observation,
     pub events: Vec<Event>,
+    #[serde(default)]
+    pub last_save_verification: Option<SaveVerification>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SaveVerification {
+    pub account_subject: String,
+    pub endpoint: String,
+    pub storage: Value,
 }
 
 impl Default for Stored {
@@ -338,11 +356,45 @@ impl Default for Stored {
             account: None,
             observation: Observation::default(),
             events: vec![],
+            last_save_verification: None,
         }
     }
 }
 
 impl Stored {
+    pub fn remember_save_verification(&mut self, runtime: &RuntimeStatus) {
+        let (Some(account), Some(endpoint)) = (&self.account, &runtime.endpoint) else {
+            return;
+        };
+        if runtime.connection != "connected"
+            || runtime.synchronization != "verified"
+            || runtime.storage["method"] != "drive_api_md5"
+            || runtime.storage["receiptId"]
+                .as_str()
+                .is_none_or(str::is_empty)
+            || runtime.storage["observedAt"].as_u64().is_none()
+            || !runtime.storage["files"].is_array()
+        {
+            return;
+        }
+        self.last_save_verification = Some(SaveVerification {
+            account_subject: account.subject.clone(),
+            endpoint: endpoint.clone(),
+            storage: runtime.storage.clone(),
+        });
+    }
+
+    pub fn current_account_save_verification(&self) -> Option<SaveVerification> {
+        self.last_save_verification
+            .as_ref()
+            .filter(|receipt| {
+                self.account
+                    .as_ref()
+                    .is_some_and(|account| account.subject == receipt.account_subject)
+            })
+            .cloned()
+    }
+
     pub fn observe(&mut self, mut observation: Observation) {
         let previous = self
             .observation
@@ -493,6 +545,7 @@ pub struct Snapshot {
     pub account: Option<Account>,
     pub observation: Observation,
     pub events: Vec<Event>,
+    pub last_save_verification: Option<SaveVerification>,
     pub data_directory: String,
     pub mode: String,
     pub version: String,
@@ -503,6 +556,113 @@ pub struct Snapshot {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn drive_verification_survives_release_and_restart_without_becoming_current() {
+        let mut saved = Stored::default();
+        saved.account = Some(Account {
+            subject: "owner".into(),
+            email: "owner@example.com".into(),
+            name: "Owner".into(),
+            status: "connected".into(),
+        });
+        let runtime = RuntimeStatus {
+            connection: "connected".into(),
+            synchronization: "verified".into(),
+            endpoint: Some("test-instance".into()),
+            storage: json!({"status":"verified", "method":"drive_api_md5", "observedAt":1234,
+                "receiptId":"test-receipt", "files":[{"applicationId":"voice-app", "path":"voice.wav",
+                "size":100, "sha256":"test-sha", "md5":"test-md5"}]}),
+            ..Default::default()
+        };
+        saved.remember_save_verification(&runtime);
+        // Releasing an instance clears live state, but must not erase the receipt.
+        saved.remember_save_verification(&RuntimeStatus::default());
+        for state in ["pending", "syncing", "failed"] {
+            let mut next = runtime.clone();
+            next.synchronization = state.into();
+            next.storage["receiptId"] = json!("not-successful");
+            saved.remember_save_verification(&next);
+        }
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("workspace.json");
+        saved.save(&path).unwrap();
+        let mut reopened = Stored::load(&path).unwrap();
+        assert_eq!(
+            reopened
+                .current_account_save_verification()
+                .unwrap()
+                .storage["receiptId"],
+            "test-receipt"
+        );
+        assert_eq!(RuntimeStatus::default().synchronization, "unobserved");
+        assert!(!reopened.may_leave_account()); // A save receipt is not evidence of zero billing.
+        reopened.account.as_mut().unwrap().subject = "another-account".into();
+        assert!(reopened.current_account_save_verification().is_none());
+        reopened.account = None;
+        assert!(reopened.current_account_save_verification().is_none());
+        let mut legacy = serde_json::to_value(&saved).unwrap();
+        legacy
+            .as_object_mut()
+            .unwrap()
+            .remove("lastSaveVerification");
+        fs::write(&path, serde_json::to_vec(&legacy).unwrap()).unwrap();
+        assert!(Stored::load(&path)
+            .unwrap()
+            .last_save_verification
+            .is_none());
+    }
+
+    #[test]
+    fn only_complete_drive_receipts_are_kept_as_history() {
+        let mut saved = Stored::default();
+        saved.account = Some(Account {
+            subject: "owner".into(),
+            email: "owner@example.com".into(),
+            name: "Owner".into(),
+            status: "connected".into(),
+        });
+        for storage in [
+            json!({"method":"no_save_rules", "receiptId":"empty", "observedAt":1, "files":[]}),
+            json!({"method":"drive_api_md5", "observedAt":1, "files":[]}),
+            json!({"method":"drive_api_md5", "receiptId":"incomplete", "files":[]}),
+        ] {
+            saved.remember_save_verification(&RuntimeStatus {
+                connection: "connected".into(),
+                synchronization: "verified".into(),
+                endpoint: Some("test-instance".into()),
+                storage,
+                ..Default::default()
+            });
+            assert!(saved.last_save_verification.is_none());
+        }
+    }
+
+    #[test]
+    fn saves_with_file_rules_require_a_mydrive_directory() {
+        let mut draft: RecipeDraft = serde_json::from_value(json!({
+            "name": "Save example", "description": "", "kind": "task",
+            "command": "printf hello", "workingDirectory": "/opt/example",
+            "saveDirectories": ["/opt/example/output"],
+            "storageDirectory": "/tmp/cloud-deck-test", "autoStart": false
+        }))
+        .unwrap();
+        for directory in ["/tmp/cloud-deck-test", "/content/drive/MyDrive-extra/data"] {
+            draft.storage_directory = directory.into();
+            assert!(validate(draft.clone(), &[], "example".into())
+                .unwrap_err()
+                .contains("MyDrive"));
+        }
+        for directory in ["/content/drive/MyDrive", "/content/drive/MyDrive/CloudDeck"] {
+            draft.storage_directory = directory.into();
+            let recipe = validate(draft.clone(), &[], "example".into()).unwrap();
+            let manifest = crate::manifest::from_recipe(&recipe);
+            assert!(crate::manifest::recipe(manifest, &[], false).is_ok());
+        }
+        draft.save_directories.clear();
+        draft.storage_directory = "/tmp/unused".into();
+        assert!(validate(draft, &[], "example".into()).is_ok());
+    }
 
     #[test]
     fn missing_or_failed_queries_never_mean_zero_billing() {
