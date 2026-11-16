@@ -305,7 +305,7 @@ def main():
     if not shutil.which('ffmpeg'):
         run(['apt-get', 'update', '-qq'])
         run(['apt-get', 'install', '-y', '-qq', 'ffmpeg'], required=False)
-    install_git(APPLICATION, 'https://github.com/Comfy-Org/ComfyUI', 'b1693ecba9f5b65f8c80ab36b195ab963ec92413')
+    install_git(APPLICATION, 'https://github.com/Comfy-Org/ComfyUI', '2aa4d535a76e4b6acf6a94f263bc482430c396dd')
     signature = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     receipt = BUILD / 'setup-completed'
     if not receipt.is_file() or receipt.read_text() != signature or not (VIRTUAL_ENV / 'bin/python').is_file():

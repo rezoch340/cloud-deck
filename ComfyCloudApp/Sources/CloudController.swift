@@ -14,7 +14,7 @@ final class CloudController: ObservableObject {
     @Published var activeRegionLabel: String?
     @Published var localTunnelReady: Bool = false
     @Published var lanURLString: String = "http://192.168.1.115:18188"
-    @Published var comfyVersionText: String = "ComfyUI 0.30.0，已配置 34 个插件"
+    @Published var comfyVersionText: String = "ComfyUI 0.45.4，已配置 34 个插件"
 
     @Published var inventoryState: InventoryLoadState = .loading
     @Published var driveConsentURL: URL?
@@ -54,7 +54,7 @@ final class CloudController: ObservableObject {
         let manifestURL = colabctlURL.deletingLastPathComponent().appendingPathComponent("manifest.json")
         guard let data = try? Data(contentsOf: manifestURL),
               let summary = try? JSONDecoder().decode(ManifestSummary.self, from: data) else { return }
-        let ver = summary.comfyui?.version ?? "0.30.0"
+        let ver = summary.comfyui?.version ?? "0.45.4"
         let count = summary.plugins?.count ?? 34
         comfyVersionText = "ComfyUI \(ver)，已配置 \(count) 个插件"
     }

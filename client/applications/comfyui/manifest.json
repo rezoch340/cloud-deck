@@ -66,6 +66,126 @@
             "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/upscale_models/2x-AnimeSharpV2_MoSR_Soft.pth"
           }
         ]
+      },
+      {
+        "target": "/opt/comfy-models/diffusion_models/moss_image_sft_bf16.safetensors",
+        "size": 10164655808,
+        "sha256": "f96738d8116d78b7316b57c663d8c98591ddafab7488f48e3099b7655e34ab6f",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/diffusion_models/moss_image_sft_bf16.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/diffusion_models/moss_image_sft_bf16.safetensors"
+          }
+        ]
+      },
+      {
+        "target": "/opt/comfy-models/text_encoders/qwen3.5_9b_int8_convrot.safetensors",
+        "size": 9748121532,
+        "sha256": "32e3787472f708fa5f83624acbf5ef23f7fc89c439e05065ea57cfe5a97f025a",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/text_encoders/qwen3.5_9b_int8_convrot.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/text_encoders/qwen3.5_9b_int8_convrot.safetensors"
+          }
+        ]
+      },
+      {
+        "target": "/opt/comfy-models/vae/flux2-vae.safetensors",
+        "size": 336211292,
+        "sha256": "868fe7b343cc8f3a19dbcfcafbc3d5f888802be3f89bd81b65b3621a066ce8f3",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/vae/flux2-vae.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/vae/flux2-vae.safetensors"
+          }
+        ]
+      },
+      {
+        "target": "/opt/comfy-models/loras/BunnySlop AI 风格/BunnySlop_MOSS.safetensors",
+        "size": 129017206,
+        "sha256": "5ba200c6e7b5fbc9230fe2bae7d118226d804364b9ccd80083d567c1138f32fe",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/BunnySlop%20AI%20%E9%A3%8E%E6%A0%BC/BunnySlop_MOSS.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/loras/BunnySlop AI 风格/BunnySlop_MOSS.safetensors"
+          }
+        ]
+      },
+      {
+        "target": "/opt/comfy-models/loras/MOSSimage鬼针草画风LORA/chenbin_style_v2_blush_1500step_rank32.safetensors",
+        "size": 148697632,
+        "sha256": "d72814124f9a517256bcbb8a377d22bcc97722d045172d219bd146ed00dfbfbe",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/MOSSimage%E9%AC%BC%E9%92%88%E8%8D%89%E7%94%BB%E9%A3%8ELORA/chenbin_style_v2_blush_1500step_rank32.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/loras/MOSSimage鬼针草画风LORA/chenbin_style_v2_blush_1500step_rank32.safetensors"
+          }
+        ]
+      },
+      {
+        "target": "/opt/comfy-models/loras/Kzmynon AI 风格 [KA]/kzmynon-moss-v1_comfyui.safetensors",
+        "size": 148698376,
+        "sha256": "8f0a79e0703fbd5cca11c6d5d97cdf3ce349f420c116c964aca59925f3c3f260",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/Kzmynon%20AI%20%E9%A3%8E%E6%A0%BC%20%5BKA%5D/kzmynon-moss-v1_comfyui.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/loras/Kzmynon AI 风格 [KA]/kzmynon-moss-v1_comfyui.safetensors"
+          }
+        ]
+      },
+      {
+        "target": "/opt/comfy-models/loras/cunnyfunky  苔藓图像库/cunnyfunky_moss_v1_lokr.safetensors",
+        "size": 145182685,
+        "sha256": "352412e6b261017b9db31eea594ab55ef21d477ab007a2dfcc43232a98bed0d3",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/cunnyfunky%20%20%E8%8B%94%E8%97%93%E5%9B%BE%E5%83%8F%E5%BA%93/cunnyfunky_moss_v1_lokr.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/loras/cunnyfunky  苔藓图像库/cunnyfunky_moss_v1_lokr.safetensors"
+          }
+        ]
+      },
+      {
+        "target": "/opt/comfy-models/loras/质量增强文本滑块 0  1/moss_anima_pure_text_slider_rank16.safetensors",
+        "size": 74401176,
+        "sha256": "29d7b624a374104a79cbe5d3d07127caf6f175e5a530baa095a7bdf6a887ccc8",
+        "sources": [
+          {
+            "kind": "download",
+            "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/%E8%B4%A8%E9%87%8F%E5%A2%9E%E5%BC%BA%E6%96%87%E6%9C%AC%E6%BB%91%E5%9D%97%200%20%201/moss_anima_pure_text_slider_rank16.safetensors"
+          },
+          {
+            "kind": "drive",
+            "path": "/content/drive/MyDrive/ComfyUI_Cloud/models/loras/质量增强文本滑块 0  1/moss_anima_pure_text_slider_rank16.safetensors"
+          }
+        ]
       }
     ]
   },
@@ -115,5 +235,5 @@
       }
     ]
   },
-  "details": "## 环境说明\n\n**ComfyUI 0.30.0**，包含 34 项插件记录（33 项启用），不安装 DLSS。\n\n三个模型优先外部下载，失败后尝试 Google Drive；启动恢复用户文件，保存时同步 user、input 和 output。\n\n以下为应用作者提供的配置说明；实际运行与同步状态请查看上方状态。\n\n### 固定插件\n\n| 组件 | 固定版本 / 提交 | 配置 |\n| --- | --- | --- |\n| ComfyLiterals | `bdddb08ca82d` | 启用 |\n| ComfyUI-0246.disabled | `d09cb3fe8266` | 禁用 |\n| ComfyUI-Crystools | `1.27.4` | 启用 |\n| ComfyUI-Manager | `00a511526737` | 启用 |\n| ComfyUI-PainterI2V | `c46e480c35d9` | 启用 |\n| ComfyUI-QwenVL | `c522c43b1561` | 启用 |\n| ComfyUI-WanMoeKSampler | `ee8fa8ffb356` | 启用 |\n| ComfyUI-WanVideoWrapper | `1.3.7` | 启用 |\n| ComfyUI-llama-cpp_vlm | `52faab1d1c5e` | 启用 |\n| ComfyUI_Comfyroll_CustomNodes | `d78b780ae43f` | 启用 |\n| Comfyui-Memory_Cleanup | `58de13a6090e` | 启用 |\n| cg-use-everywhere | `7.3.0` | 启用 |\n| comfy-mtb | `0.5.4` | 启用 |\n| comfyui-animatediff-evolved | `1.5.6` | 启用 |\n| comfyui-cogvideoxwrapper | `1.5.1` | 启用 |\n| comfyui-custom-scripts | `1.2.5` | 启用 |\n| comfyui-easy-use | `1.3.4` | 启用 |\n| comfyui-florence2 | `1.0.6` | 启用 |\n| comfyui-frame-interpolation | `1.0.7` | 启用 |\n| comfyui-impact-pack | `8.25.1` | 启用 |\n| comfyui-inpaint-cropandstitch | `2.1.7` | 启用 |\n| comfyui-kjnodes | `3f20054214fe` | 启用 |\n| comfyui-mixlab-nodes | `0.46.0` | 启用 |\n| comfyui-mxtoolkit | `0.9.92` | 启用 |\n| comfyui-videohelpersuite | `1.7.7` | 启用 |\n| comfyui-wd14-tagger | `1.0.1` | 启用 |\n| comfyui_controlnet_aux | `cc6b232f4a47` | 启用 |\n| comfyui_custom_nodes_alekpet | `1.0.88` | 启用 |\n| comfyui_essentials | `1.1.0` | 启用 |\n| comfyui_layerstyle | `1.0.90` | 启用 |\n| comfyui_ultimatesdupscale | `1.5.1` | 启用 |\n| derfuu_comfyui_moddednodes | `1.0.1` | 启用 |\n| rgthree-comfy | `1.0.2510052058` | 启用 |\n| was-ns | `3.0.1` | 启用 |"
+  "details": "## 环境说明\n\n**ComfyUI 0.45.4**，包含 34 项插件记录（33 项启用），不安装 DLSS。\n\n十一个模型优先外部下载，失败后尝试 Google Drive；启动恢复用户文件，保存时同步 user、input 和 output。\n\n以下为应用作者提供的配置说明；实际运行与同步状态请查看上方状态。\n\n### 固定插件\n\n| 组件 | 固定版本 / 提交 | 配置 |\n| --- | --- | --- |\n| ComfyLiterals | `bdddb08ca82d` | 启用 |\n| ComfyUI-0246.disabled | `d09cb3fe8266` | 禁用 |\n| ComfyUI-Crystools | `1.27.4` | 启用 |\n| ComfyUI-Manager | `00a511526737` | 启用 |\n| ComfyUI-PainterI2V | `c46e480c35d9` | 启用 |\n| ComfyUI-QwenVL | `c522c43b1561` | 启用 |\n| ComfyUI-WanMoeKSampler | `ee8fa8ffb356` | 启用 |\n| ComfyUI-WanVideoWrapper | `1.3.7` | 启用 |\n| ComfyUI-llama-cpp_vlm | `52faab1d1c5e` | 启用 |\n| ComfyUI_Comfyroll_CustomNodes | `d78b780ae43f` | 启用 |\n| Comfyui-Memory_Cleanup | `58de13a6090e` | 启用 |\n| cg-use-everywhere | `7.3.0` | 启用 |\n| comfy-mtb | `0.5.4` | 启用 |\n| comfyui-animatediff-evolved | `1.5.6` | 启用 |\n| comfyui-cogvideoxwrapper | `1.5.1` | 启用 |\n| comfyui-custom-scripts | `1.2.5` | 启用 |\n| comfyui-easy-use | `1.3.4` | 启用 |\n| comfyui-florence2 | `1.0.6` | 启用 |\n| comfyui-frame-interpolation | `1.0.7` | 启用 |\n| comfyui-impact-pack | `8.25.1` | 启用 |\n| comfyui-inpaint-cropandstitch | `2.1.7` | 启用 |\n| comfyui-kjnodes | `3f20054214fe` | 启用 |\n| comfyui-mixlab-nodes | `0.46.0` | 启用 |\n| comfyui-mxtoolkit | `0.9.92` | 启用 |\n| comfyui-videohelpersuite | `1.7.7` | 启用 |\n| comfyui-wd14-tagger | `1.0.1` | 启用 |\n| comfyui_controlnet_aux | `cc6b232f4a47` | 启用 |\n| comfyui_custom_nodes_alekpet | `1.0.88` | 启用 |\n| comfyui_essentials | `1.1.0` | 启用 |\n| comfyui_layerstyle | `1.0.90` | 启用 |\n| comfyui_ultimatesdupscale | `1.5.1` | 启用 |\n| derfuu_comfyui_moddednodes | `1.0.1` | 启用 |\n| rgthree-comfy | `1.0.2510052058` | 启用 |\n| was-ns | `3.0.1` | 启用 |"
 }

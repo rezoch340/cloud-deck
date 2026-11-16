@@ -1316,7 +1316,7 @@ TOOLS = [
     },
     {
         "name": "up_comfy_linux",
-        "description": "One-click notebook-free boot: allocate GPU Linux VM, mount Google Drive, restore/install ComfyUI v0.30.0 + 34 plugins (no DLSS), and open local encrypted tunnel http://127.0.0.1:18188.",
+        "description": "One-click notebook-free boot: allocate GPU Linux VM, mount Google Drive, restore/install ComfyUI v0.45.4 + 34 plugins (no DLSS), and open local encrypted tunnel http://127.0.0.1:18188.",
         "inputSchema": {
             "type": "object",
             "properties": {

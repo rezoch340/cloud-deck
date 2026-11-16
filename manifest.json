@@ -1,9 +1,9 @@
 {
-  "bundle_id": "comfyui-v0.30.0-nodes34-nodlss",
+  "bundle_id": "comfyui-v0.45.4-nodes34-nodlss",
   "comfyui": {
     "repository": "https://github.com/Comfy-Org/ComfyUI",
-    "commit": "b1693ecba9f5b65f8c80ab36b195ab963ec92413",
-    "version": "0.30.0"
+    "commit": "2aa4d535a76e4b6acf6a94f263bc482430c396dd",
+    "version": "0.45.4"
   },
   "plugins": [
     {
@@ -432,6 +432,54 @@
       "url": "https://huggingface.co/Kim2091/AnimeSharpV2/resolve/main/2x-AnimeSharpV2_MoSR_Soft.pth",
       "size": 17324914,
       "sha256": "141bd9b90c323f84cbeb17b4238f3b27df29fb43aeb09916aa6791d00e9352e4"
+    },
+    {
+      "path": "diffusion_models/moss_image_sft_bf16.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/diffusion_models/moss_image_sft_bf16.safetensors",
+      "size": 10164655808,
+      "sha256": "f96738d8116d78b7316b57c663d8c98591ddafab7488f48e3099b7655e34ab6f"
+    },
+    {
+      "path": "text_encoders/qwen3.5_9b_int8_convrot.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/text_encoders/qwen3.5_9b_int8_convrot.safetensors",
+      "size": 9748121532,
+      "sha256": "32e3787472f708fa5f83624acbf5ef23f7fc89c439e05065ea57cfe5a97f025a"
+    },
+    {
+      "path": "vae/flux2-vae.safetensors",
+      "url": "https://huggingface.co/Comfy-Org/MOSS-Image/resolve/main/vae/flux2-vae.safetensors",
+      "size": 336211292,
+      "sha256": "868fe7b343cc8f3a19dbcfcafbc3d5f888802be3f89bd81b65b3621a066ce8f3"
+    },
+    {
+      "path": "loras/BunnySlop AI 风格/BunnySlop_MOSS.safetensors",
+      "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/BunnySlop%20AI%20%E9%A3%8E%E6%A0%BC/BunnySlop_MOSS.safetensors",
+      "size": 129017206,
+      "sha256": "5ba200c6e7b5fbc9230fe2bae7d118226d804364b9ccd80083d567c1138f32fe"
+    },
+    {
+      "path": "loras/MOSSimage鬼针草画风LORA/chenbin_style_v2_blush_1500step_rank32.safetensors",
+      "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/MOSSimage%E9%AC%BC%E9%92%88%E8%8D%89%E7%94%BB%E9%A3%8ELORA/chenbin_style_v2_blush_1500step_rank32.safetensors",
+      "size": 148697632,
+      "sha256": "d72814124f9a517256bcbb8a377d22bcc97722d045172d219bd146ed00dfbfbe"
+    },
+    {
+      "path": "loras/Kzmynon AI 风格 [KA]/kzmynon-moss-v1_comfyui.safetensors",
+      "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/Kzmynon%20AI%20%E9%A3%8E%E6%A0%BC%20%5BKA%5D/kzmynon-moss-v1_comfyui.safetensors",
+      "size": 148698376,
+      "sha256": "8f0a79e0703fbd5cca11c6d5d97cdf3ce349f420c116c964aca59925f3c3f260"
+    },
+    {
+      "path": "loras/cunnyfunky  苔藓图像库/cunnyfunky_moss_v1_lokr.safetensors",
+      "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/cunnyfunky%20%20%E8%8B%94%E8%97%93%E5%9B%BE%E5%83%8F%E5%BA%93/cunnyfunky_moss_v1_lokr.safetensors",
+      "size": 145182685,
+      "sha256": "352412e6b261017b9db31eea594ab55ef21d477ab007a2dfcc43232a98bed0d3"
+    },
+    {
+      "path": "loras/质量增强文本滑块 0  1/moss_anima_pure_text_slider_rank16.safetensors",
+      "url": "https://huggingface.co/yuan333333/w9j5s_u5wh6/resolve/main/loras/%E8%B4%A8%E9%87%8F%E5%A2%9E%E5%BC%BA%E6%96%87%E6%9C%AC%E6%BB%91%E5%9D%97%200%20%201/moss_anima_pure_text_slider_rank16.safetensors",
+      "size": 74401176,
+      "sha256": "29d7b624a374104a79cbe5d3d07127caf6f175e5a530baa095a7bdf6a887ccc8"
     }
   ]
 }

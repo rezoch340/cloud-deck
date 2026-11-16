@@ -101,10 +101,10 @@
     button('查看 manifest.json').click();
     await waitFor(() => document.querySelector('[name="manifest"]'));
     const canonical = JSON.parse(document.querySelector('[name="manifest"]').value);
-    if (canonical.resources.files.length !== 3 || 'installation' in canonical || 'usePreparedLaunch' in canonical.runtime || 'documents' in canonical.resources || canonical.shutdown.save.length !== 3) throw Error('Bundled lifecycle manifest did not contain the expected resources and save rules');
+    if (canonical.resources.files.length !== 11 || 'installation' in canonical || 'usePreparedLaunch' in canonical.runtime || 'documents' in canonical.resources || canonical.shutdown.save.length !== 3) throw Error('Bundled lifecycle manifest did not contain the expected resources and save rules');
     button('关闭').click();
     await waitFor(() => !document.querySelector('[role="dialog"]'));
-    checks.push('Built-in manifest viewer contains three resources and three save rules with ordinary commands and no installation schema');
+    checks.push('Built-in manifest viewer contains eleven resources and three save rules with ordinary commands and no installation schema');
     if (initial.observation.lastInstance?.regionLabel) {
       document.querySelector('nav button[aria-label="云端工作台"]').click();
       await waitFor(() => document.querySelector('.cd-machine-identity')?.textContent.includes(initial.observation.lastInstance.regionLabel));

@@ -185,7 +185,7 @@ def _build_fresh(manifest: dict, cache_tar: pathlib.Path) -> None:
             for req_item in plugin_reqs:
                 subprocess.run(pip_cmd([req_item]), check=False, capture_output=True)
 
-    # Core ComfyUI v0.30.0 requirements + CUDA 13 compatible bitsandbytes/sageattention
+    # Core ComfyUI v0.45.4 requirements + CUDA 13 compatible bitsandbytes/sageattention
     _run(pip_cmd(["-r", str(APP_DIR / "requirements.txt")]))
     subprocess.run(pip_cmd(["-U", "bitsandbytes"]), check=False, capture_output=True)
     subprocess.run(pip_cmd(["sageattention"]), check=False, capture_output=True)
