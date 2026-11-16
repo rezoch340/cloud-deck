@@ -1,8 +1,18 @@
 # Cloud Deck · 新 session 接手说明
 
-更新时间：2026-11-15
+更新时间：2026-11-16
 正式项目：本仓库根目录（`.`）
 原项目：`../../remote-ssh/ComfyUI-colab`（相对本仓库根目录）
+
+## 2026-11-16：Windows 发行包启动报 ERR_FILE_NOT_FOUND
+
+- 基于 `main` 的 `9f3d835` / v0.1.1，新建 `codex/fix-windows-frontend-assets`。用户确认公开 Release 的 Windows x64 便携版启动即报错；下载该包后，在主程序里找到构建机的 `d:\a\_temp\cloud-deck-work\build\cloud-deck\client\dist`。
+- 根因是 runner 将盘符绝对路径传入 `frontendDist`，Tauri 将其反序列化为外部 URL，跳过资源嵌入；运行时尝试加载用户机器上不存在的构建目录。参见 [Tauri #14005](https://github.com/tauri-apps/tauri/issues/14005)。缺少 `cloud/` 并不是本次启动错误的原因；该目录保存云端脚本与应用清单，安装版由安装器部署，便携版随 ZIP 解压。
+- runner 新增 `client/dist` → 外部构建产物目录的链接（Windows junction），Tauri 始终使用 `../dist`。保留外盘构建要求，并支持源码和缓存位于不同磁盘。
+- 新增 `--check-frontend-assets`，使用与窗口启动相同的 Tauri context，确认配置为本地目录且内嵌首页、首页引用的 JS/CSS 均可读取。该入口不打开窗口、不启动 MCP 或访问账号；CI 在构建 Windows 程序后执行，失败阻止发布。
+- 定向 Rust 回归 2/2、TS/Vite 构建、macOS 原生离线 UI 10 项、内嵌资源自检、Rust 格式与 diff 检查通过。原生报告为 `<工作根>/tmp/cloud-deck/client/native-smoke-0urVRt/native-check.json`。Windows x64 NSIS 交叉编译通过，便携 ZIP 完整性及 7 份云端资源与源码逐字节核对通过；新二进制包含当前 JS/CSS 资源键，旧发布包没有，且新包不含错误的构建机加载地址。
+- 本地修复测试包和 `verification.json` 位于 `<工作根>/tmp/cloud-deck-windows-startup-20261116/artifacts/`。便携包 `CloudDeck-0.1.1-windows-x64-portable-startup-fix.zip`，SHA-256 `05b32ab6ec341bfc54402f774103f1132df8d47bbd85cef3600d38729a2b4d62`；安装包 `CloudDeck-0.1.1-windows-x64-startup-fix-setup.exe`，SHA-256 `977d2976e1c2e37dac7233d8a2f8156e3ccc188acd7d2d9ed88085cb93279b81`。这些文件是正式发版前的 0.1.1 测试产物。
+- 用户已授权提交、推送、合并并发布 v0.1.2。四处版本元数据已统一为 0.1.2；正式包由标签触发 Windows Runner 构建并执行内嵌界面检查，结果以 [v0.1.2 Release](https://github.com/rezoch340/cloud-deck/releases/tag/v0.1.2) 与对应 Actions 记录为准。Windows WebView2 实机启动仍待用户验收，本轮未操作云端。
 
 ## 2026-11-16：通用创作应用与保存记录
 

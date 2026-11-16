@@ -31,6 +31,8 @@ function linkDirectory(link, target) {
 linkDirectory(path.join(project, 'src-tauri/gen'), path.join(build, 'gen'));
 linkDirectory(path.join(project, 'src-tauri/icons'), path.join(build, 'icons'));
 linkDirectory(path.join(project, 'node_modules'), path.join(build, 'node_modules'));
+// 使用固定相对路径供 Tauri 嵌入界面；实际产物仍在外盘，Windows 使用可跨盘的 junction。
+linkDirectory(path.join(project, 'dist'), path.join(build, 'dist'));
 const host = process.platform === 'darwin' ? `${process.arch === 'arm64' ? 'aarch64' : 'x86_64'}-apple-darwin` : `${process.arch === 'arm64' ? 'aarch64' : 'x86_64'}-pc-windows-msvc`;
 const toolchainHome = process.env.RUSTUP_HOME || path.join(os.homedir(), '.rustup');
 const defaultRustBin = path.join(toolchainHome, 'toolchains', `stable-${host}`, 'bin');
@@ -74,7 +76,8 @@ function webBuild() {
 function desktopBuild(args) {
   webBuild();
   const localConfig = path.join(temporary, 'tauri-build.json');
-  const configuration = { build: { frontendDist: path.join(build, 'dist') } };
+  // 带盘符的绝对路径会被 Tauri 当成 URL，导致发行包没有嵌入前端文件。
+  const configuration = { build: { frontendDist: '../dist' } };
   if (process.platform === 'darwin') {
     let identity = process.env.CLOUD_DECK_SIGNING_IDENTITY;
     if (!identity) {

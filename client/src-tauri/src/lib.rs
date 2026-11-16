@@ -4,6 +4,7 @@ mod cloud;
 mod connection;
 mod credentials;
 mod drive;
+mod frontend_assets;
 mod manifest;
 mod mcp;
 mod mcp_bridge;
@@ -17,6 +18,15 @@ mod update;
 /// `--mcp-stdio` 入口：把 MCP 客户端的标准输入输出转发给正在运行的客户端。
 pub fn mcp_stdio(args: &[String]) -> i32 {
     mcp_bridge::run(args)
+}
+
+/// 检查当前可执行文件的内嵌界面，不创建窗口、不读取账号或访问云端。
+pub fn check_frontend_assets() -> Result<(), String> {
+    frontend_assets::check(&app_context())
+}
+
+fn app_context() -> tauri::Context<tauri::Wry> {
+    tauri::generate_context!()
 }
 
 fn smoke_mode() -> bool {
@@ -1151,7 +1161,7 @@ pub fn run() {
             refresh_account,
             sign_out
         ])
-        .run(tauri::generate_context!())
+        .run(app_context())
         .expect("Cloud Deck could not start");
 }
 
