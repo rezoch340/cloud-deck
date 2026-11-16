@@ -61,7 +61,8 @@ ComfyUI 新前端的默认 Z-Image 模板会引用本项目未配置的 Qwen / Z
 - 依赖、前端产物、Cargo target、生成图标和 schema：`<工作根>/build/cloud-deck/client/`。
 - Cargo、pnpm、npm、clang、Tauri、XDG 缓存：`<工作根>/cache/`；临时文件：`<工作根>/tmp/cloud-deck/client/`。
 - 统一入口启动时，应用数据默认使用 `<工作根>/data/cloud-deck/client/`。可用 `CLOUD_DECK_DATA_DIR` 覆盖。
-- `client/node_modules`、`client/src-tauri/icons` 和 `gen` 为指向外盘的链接；切换工作根时只重定向符号链接，不删除旧目标；遇到真实目录则拒绝覆盖。
+- `client/node_modules`、`client/dist`、`client/src-tauri/icons` 和 `gen` 为指向外盘的链接（Windows 使用 junction）；切换工作根时只重定向链接，不删除旧目标；遇到真实目录则拒绝覆盖。
+- Tauri 的 `frontendDist` 固定为 `../dist`。不能直接传入 Windows 盘符绝对路径：当前 Tauri 会将其解析为 URL，跳过前端资源嵌入，安装后启动报 `ERR_FILE_NOT_FOUND`。相对链接兼容源码与构建目录位于不同磁盘的情况。
 - 复用既有 Rust 工具链，不自动安装。非默认位置可通过 `CLOUD_DECK_RUST_BIN` 指向其 `bin` 目录。
 - 用户直接打开安装后的应用时，配置默认使用系统应用数据目录；开发及原生验证通过环境变量隔离到外盘。令牌始终由系统凭据存储管理。
 
@@ -98,6 +99,8 @@ node client/scripts/run.mjs desktop-build --bundles app
 输出位于 `<工作根>/build/cloud-deck/client/target/release/bundle/macos/Cloud Deck.app`。此命令的 `app` bundle 类型只适用于 macOS；Windows 安装包另行验证。runner 优先使用 `CLOUD_DECK_SIGNING_IDENTITY`，否则自动选择本机唯一有效的 Apple Development / Developer ID Application 身份；没有唯一身份时使用临时签名。本轮已使用用户现有个人开发签名，debug/release 的 designated requirement 一致，减少重建后的钥匙串授权提示；未公证，不属于正式发行包。
 
 ## 本地检查
+
+发行程序提供 `--check-frontend-assets`：检查编译配置为本地目录，且内嵌首页与其引用的 JavaScript/CSS 可读取；成功退出码为 0，缺失则为 1。检查不创建窗口、不读取凭据、不连接云端。Windows 发版流程构建后运行该检查，失败时禁止上传和发布产物；此检查不代替 WebView2 实机启动验收。
 
 状态与应用配置测试：
 

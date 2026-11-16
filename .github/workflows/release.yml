@@ -66,6 +66,15 @@ jobs:
       - name: 构建 Windows NSIS 安装包
         run: node client/scripts/run.mjs desktop-build --bundles nsis
 
+      - name: 检查发行程序的内嵌界面
+        shell: pwsh
+        run: |
+          $binaryPath = Join-Path $env:CLOUD_DECK_WORK_ROOT "build\cloud-deck\client\target\release\cloud-deck.exe"
+          $checkProcess = Start-Process -FilePath $binaryPath -ArgumentList "--check-frontend-assets" -Wait -PassThru
+          if ($checkProcess.ExitCode -ne 0) {
+            throw "发行程序没有正确嵌入首页与 JS/CSS，停止发布。"
+          }
+
       - name: 整理 Windows 发行产物
         shell: pwsh
         env:

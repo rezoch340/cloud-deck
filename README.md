@@ -89,7 +89,7 @@ ComfyUI 与任意自定义 Web 服务、后台任务并列运行于同一套清�
 | **macOS（本机签名构建）** | `CloudDeck-<version>-macos-*.dmg` / `.app.zip` | 由维护者在本机使用签名身份构建并按需补充上传至 Release；客户端在 macOS 下检测到新稳定版后展示更新日志，并一键在系统浏览器打开对应 GitHub Release 页面下载替换。 |
 
 - 更新网络策略：客户端仅请求受信任的 HTTPS GitHub 官方域名（`api.github.com`、`github.com`、`*.githubusercontent.com`），跳过 draft 与 prerelease；启动 3 秒后后台检查一次，设置环境变量 `CLOUD_DECK_AUTO_UPDATE_CHECK=0` 可关闭自动检查。
-- 标签自动发版：仓库维护者推送 `v*` 语义化标签（例如 `git tag v0.1.1 && git push origin v0.1.1`）将触发 [Release Workflow](.github/workflows/release.yml)，自动同步 4 处版本号、运行测试并构建 Windows x64（NSIS 安装包 + Portable ZIP）产物与 `SHA256SUMS.txt` 发布至 GitHub Releases；也可在 GitHub Actions 中使用 `workflow_dispatch` 执行演练打包（演练模式仅上传构建产物，不发布正式 Release）。macOS 包暂不由 CI 构建，保留本机单独打包。
+- 标签自动发版：仓库维护者推送 `v*` 语义化标签（例如 `git tag v0.1.2 && git push origin v0.1.2`）将触发 [Release Workflow](.github/workflows/release.yml)，自动同步 4 处版本号、运行测试并构建 Windows x64（NSIS 安装包 + Portable ZIP）产物与 `SHA256SUMS.txt` 发布至 GitHub Releases；也可在 GitHub Actions 中使用 `workflow_dispatch` 执行演练打包（演练模式仅上传构建产物，不发布正式 Release）。macOS 包暂不由 CI 构建，保留本机单独打包。
 
 ## 通用应用清单与本机 MCP 接入
 
@@ -185,7 +185,7 @@ node client/scripts/run.mjs paths
 node client/scripts/run.mjs install
 
 # 校验 4 处客户端版本号是否一致（package.json / tauri.conf.json / Cargo.toml / Cargo.lock）
-node client/scripts/sync-version.mjs 0.1.1 --check
+node client/scripts/sync-version.mjs 0.1.2 --check
 
 # 启动前端浏览器预览（http://127.0.0.1:18774，配置仅保存在本地浏览器，不触碰云端）
 node client/scripts/run.mjs dev
