@@ -37,6 +37,13 @@ fn list<'value>(value: &'value Value, label: &str) -> Result<&'value Vec<Value>,
 }
 
 pub fn recipe(manifest: Value, current: &[Recipe], builtin: bool) -> Result<Recipe, String> {
+    if manifest.get("category").is_some_and(|value| {
+        !value
+            .as_str()
+            .is_some_and(|kind| matches!(kind, "audio" | "video" | "llm" | "workflow" | "general"))
+    }) {
+        return Err("应用分类必须为 audio、video、llm、workflow 或 general。".into());
+    }
     if manifest["schemaVersion"] != 1 || manifest.to_string().len() > 512 * 1024 {
         return Err("应用清单版本必须为 1，大小不能超过 512 KiB。".into());
     }

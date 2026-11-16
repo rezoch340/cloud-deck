@@ -194,6 +194,8 @@ export default function App() {
             apps={snapshot.apps}
             open={open}
             add={add}
+            runtime={snapshot.runtime}
+            launch={(id) => void api.openApplication(id).catch(notifyFailure)}
             addManifest={() =>
               setManifestEditor({
                 manifest: newApplicationManifest(),
@@ -238,6 +240,7 @@ export default function App() {
               app={current}
               select={setSelected}
               runtime={snapshot.runtime}
+              lastSaveVerification={snapshot.lastSaveVerification}
               busy={busy}
               save={() => setSaving('save')}
             />

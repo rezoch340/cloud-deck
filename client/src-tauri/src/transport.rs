@@ -163,7 +163,8 @@ impl Transport {
         });
         let connected = async {
             let config = Arc::new(client::Config {
-                inactivity_timeout: Some(Duration::from_secs(90)),
+                // Drive consent may wait up to 300 seconds without SSH channel traffic.
+                inactivity_timeout: Some(Duration::from_secs(420)),
                 ..Default::default()
             });
             let mut handle = client::connect_stream(

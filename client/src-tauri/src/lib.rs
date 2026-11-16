@@ -92,6 +92,7 @@ impl Backend {
             account: data.account.clone(),
             observation: data.observation.clone(),
             events: data.events.clone(),
+            last_save_verification: data.current_account_save_verification(),
             data_directory: self
                 .path
                 .parent()
@@ -619,7 +620,9 @@ fn cloud_result(
 }
 async fn poll_cloud(backend: &Backend) -> Result<(), String> {
     let events = backend.cloud.refresh(&backend.snapshot()?.apps).await?;
+    let runtime = backend.cloud.snapshot(&[])?;
     backend.change(|data| {
+        data.remember_save_verification(&runtime);
         for event in events {
             if !data.events.iter().any(|old| {
                 old.time == event.time

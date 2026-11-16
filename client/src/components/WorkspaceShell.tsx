@@ -64,7 +64,7 @@ export function WorkspaceShell({
     snapshot?.runtime.connection || 'not_connected'
   ];
   const sync = {
-    unobserved: '未检查',
+    unobserved: '本次未查询',
     pending: '待同步',
     syncing: '同步中',
     verified: '已校验',

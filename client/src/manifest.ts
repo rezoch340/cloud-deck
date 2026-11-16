@@ -16,6 +16,7 @@ export interface ApplicationManifest {
   name: string;
   description: string;
   details?: string;
+  category?: 'audio' | 'video' | 'llm' | 'workflow' | 'general';
   kind: 'service' | 'task';
   runtime: {
     command: string;
@@ -41,6 +42,12 @@ export function parseApplicationManifest(text: string): ApplicationManifest {
     throw new Error('应用清单不能超过 512 KiB。');
   }
   const manifest = JSON.parse(text) as ApplicationManifest;
+  if (
+    manifest?.category !== undefined &&
+    !['audio', 'video', 'llm', 'workflow', 'general'].includes(manifest.category)
+  ) {
+    throw new Error('应用分类必须为 audio、video、llm、workflow 或 general。');
+  }
   if (
     manifest?.schemaVersion !== 1 ||
     typeof manifest.id !== 'string' ||

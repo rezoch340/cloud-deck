@@ -49,13 +49,18 @@ export function ManifestLifecycle({ app }: { app: Recipe }) {
         <div>
           <dt>准备步骤</dt>
           <dd>
-            {manifest.startup.commands.length
-              ? manifest.startup.commands.map((step, index) => (
+            {manifest.startup.commands.length ? (
+              <details>
+                <summary>{manifest.startup.commands.length} 个步骤，查看命令</summary>
+                {manifest.startup.commands.map((step, index) => (
                   <div key={index}>
                     <code>{step.command}</code>
                   </div>
-                ))
-              : '无'}
+                ))}
+              </details>
+            ) : (
+              '无'
+            )}
           </dd>
         </div>
         <div>
