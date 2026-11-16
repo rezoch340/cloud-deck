@@ -44,7 +44,7 @@
     if (!created || created.kind !== 'task') throw Error('Native configuration save failed');
     checks.push('HeroUI task editor saved through native command');
     const card = Array.from(document.querySelectorAll('.cd-application-card')).find(item => item.textContent.includes(name));
-    card.querySelector('button').click();
+    Array.from(card.querySelectorAll('button')).find(item => item.textContent.includes('查看配置')).click();
     await waitFor(() => button('移除本地配置'));
     await waitFor(() => document.querySelector('.cd-application-logs pre'));
     if (!document.querySelector('.cd-application-logs').textContent.includes('部署与运行日志')) throw Error('Generic application log panel is missing');
@@ -95,7 +95,7 @@
     button('移除配置').click();
     await waitFor(() => !document.querySelector('[role="dialog"]'));
     const builtin = Array.from(document.querySelectorAll('.cd-application-card')).find(item => item.textContent.includes('ComfyUI'));
-    builtin.querySelector('button').click();
+    Array.from(builtin.querySelectorAll('button')).find(item => item.textContent.includes('查看配置')).click();
     await waitFor(() => document.querySelector('.cd-page-content').textContent.includes('setup.py'));
     checks.push('Bundled ComfyUI configuration rendered in native WebView');
     button('查看 manifest.json').click();

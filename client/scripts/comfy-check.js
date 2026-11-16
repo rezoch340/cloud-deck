@@ -23,7 +23,7 @@
     navigation.click();
     await pause(150);
     const card = Array.from(document.querySelectorAll('.cd-application-card')).find(element => element.textContent.includes('ComfyUI'));
-    card?.querySelector('button')?.click();
+    Array.from(card?.querySelectorAll('button') || []).find(item => item.textContent.includes('查看配置'))?.click();
     await pause(150);
     const resumed = ['preparing', 'running'].includes(state.runtime.applications.comfyui);
     if (!resumed) {

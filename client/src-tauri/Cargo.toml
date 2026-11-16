@@ -1,6 +1,6 @@
 [package]
 name = "cloud-deck"
-version = "0.1.0"
+version = "0.1.1"
 description = "Cloud Deck desktop client"
 edition = "2021"
 

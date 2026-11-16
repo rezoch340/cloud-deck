@@ -3,6 +3,7 @@
   "id": "comfyui",
   "name": "ComfyUI",
   "description": "图像与视频创作，使用我们已配置的环境、插件和模型。",
+  "category": "workflow",
   "kind": "service",
   "runtime": {
     "command": "exec bash \"$CLOUD_DECK_APP_DIR/start.sh\"",

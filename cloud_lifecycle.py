@@ -112,6 +112,8 @@ def validate_manifest(manifest):
         raise ValueError('Manifest exceeds 512 KiB')
     if 'details' in manifest and (not isinstance(manifest['details'], str) or len(manifest['details'].encode()) > 64 * 1024):
         raise ValueError('details must be Markdown text of at most 64 KiB')
+    if 'category' in manifest and manifest['category'] not in ('audio', 'video', 'llm', 'workflow', 'general'):
+        raise ValueError('Invalid application category')
     for section in ('runtime', 'resources', 'startup', 'shutdown'):
         if not isinstance(manifest.get(section), dict):
             raise ValueError('Missing manifest section: ' + section)

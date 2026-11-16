@@ -11,6 +11,7 @@ test('ComfyUI uses the canonical lifecycle manifest and external-first resources
   const manifest = parseApplicationManifest(text);
   const application = manifestRecipe(manifest, true);
   assert.equal(application.id, 'comfyui');
+  assert.equal(manifest.category, 'workflow');
   assert.equal(application.autoStart, false);
   assert.equal(application.saveDirectories.length, 3);
   assert.equal('installation' in manifest, false);
@@ -27,6 +28,10 @@ test('incomplete or unverifiable resources cannot be saved', () => {
   manifest.resources.files[0].sha256 = '';
   assert.throws(() => parseApplicationManifest(JSON.stringify(manifest)), /SHA-256/);
   assert.throws(() => parseApplicationManifest('{}'), /清单需要/);
+  assert.throws(
+    () => parseApplicationManifest(JSON.stringify({ ...JSON.parse(text), category: 'invalid' })),
+    /分类/,
+  );
 });
 
 test('a task with commands needs no downloads or Drive rules', () => {

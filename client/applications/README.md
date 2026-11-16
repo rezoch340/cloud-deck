@@ -81,6 +81,7 @@ comfyui/
 | `schemaVersion` | 当前为 `1`，清单最大 512 KiB |
 | `id`、`name`、`description` | 稳定标识、名称、说明 |
 | `details` | 可选的只读 Markdown 详细说明，不参与执行 |
+| `category` | 可选分类：`audio`、`video`、`llm`、`workflow` 或 `general`（默认 `general`） |
 | `kind` | `service` 长期服务，或 `task` 一次性任务 |
 | `runtime` | 命令、工作目录、环境变量；服务用 `readiness` 判断就绪，端口按需配置 |
 | `resources.files` | 文件的目标、大小、SHA-256 和有序来源；可为 `[]` |

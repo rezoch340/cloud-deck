@@ -93,7 +93,7 @@
     const navigation = document.querySelector('nav button[aria-label="应用"]');
     navigation?.click();
     await pause(250);
-    Array.from(document.querySelectorAll('.cd-application-card')).find(element => element.textContent.includes('ComfyUI'))?.querySelector('button')?.click();
+    Array.from(Array.from(document.querySelectorAll('.cd-application-card')).find(element => element.textContent.includes('ComfyUI'))?.querySelectorAll('button') || []).find(item => item.textContent.includes('查看配置'))?.click();
     await pause(250);
     await invoke('native_check_report', { report: { passed: true, kind: 'manifest-comfyui', checks, evidence, endpoint, applicationUrl: state.runtime.applicationUrls.comfyui, instanceRetained: !created } });
   } catch (error) {

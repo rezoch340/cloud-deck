@@ -47,7 +47,7 @@ export async function checkClientUI() {
   await click('nav button[aria-label="应用"]');
   check(q('.cd-page-header h1').textContent === '应用', '主要导航切换到应用页');
   const builtin = Array.from(document.querySelectorAll('.cd-application-card')).find(card => card.textContent.includes('ComfyUI'));
-  await click(builtin.querySelector('button'));
+  await click(button('查看配置', builtin));
   check(q('.cd-page-content').textContent.includes(manifest.comfyui.version), '内置版本来自现有清单');
   check(q('.cd-page-content').textContent.includes(`${manifest.plugins.length} 个插件记录`), '插件数量来自现有清单');
   check(q('.cd-page-content').textContent.includes('cloud_bootstrap.py'), '内置配方复用现有准备脚本');
@@ -84,7 +84,7 @@ export async function checkClientUI() {
   check(!!created && created.remotePort === remotePort && created.localPort === localPort, '应用配置真实保存到预览存储');
   createdId = created.id;
   const card = Array.from(document.querySelectorAll('.cd-application-card')).find(c => c.textContent.includes(name));
-  await click(card.querySelector('button'));
+  await click(button('查看配置', card));
   await click(button('编辑配置'));
   await fill('name', name + '-已编辑');
   await click('[role="dialog"] button[aria-haspopup="listbox"]');
@@ -96,7 +96,7 @@ export async function checkClientUI() {
   const edited = (await getWorkspace()).apps.find(app => app.id === createdId);
   check(edited.kind === 'task' && edited.remotePort === null, '编辑保留应用标识并更新任务类型');
   const editedCard = Array.from(document.querySelectorAll('.cd-application-card')).find(c => c.textContent.includes(name + '-已编辑'));
-  await click(editedCard.querySelector('button'));
+  await click(button('查看配置', editedCard));
   await click(button('移除本地配置'));
   await click(button('移除配置', q('[role="dialog"]')));
   await waitFor(() => !q('[role="dialog"]'));
