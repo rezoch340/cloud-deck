@@ -96,7 +96,17 @@ node client/scripts/run.mjs web-build
 node client/scripts/run.mjs desktop-build --bundles app
 ```
 
-输出位于 `<工作根>/build/cloud-deck/client/target/release/bundle/macos/Cloud Deck.app`。此命令的 `app` bundle 类型只适用于 macOS；Windows 安装包另行验证。runner 优先使用 `CLOUD_DECK_SIGNING_IDENTITY`，否则自动选择本机唯一有效的 Apple Development / Developer ID Application 身份；没有唯一身份时使用临时签名。本轮已使用用户现有个人开发签名，debug/release 的 designated requirement 一致，减少重建后的钥匙串授权提示；未公证，不属于正式发行包。
+输出位于 `<工作根>/build/cloud-deck/client/target/release/bundle/macos/Cloud Deck.app`。此命令的 `app` bundle 类型只适用于 macOS；Windows 安装包另行验证。runner 优先使用 `CLOUD_DECK_SIGNING_IDENTITY`，否则自动选择本机唯一有效的 Apple Development / Developer ID Application 身份；没有唯一身份时使用临时签名。本地开发保留个人签名以减少重建后的钥匙串授权提示。
+
+生成无需开发者证书的 macOS 分发包：
+
+```bash
+node client/scripts/run.mjs macos-package
+```
+
+此入口先核对四处版本号，再按当前 Mac 的架构构建并执行 ad-hoc 签名。`<工作根>/build/cloud-deck/client/artifacts/macos-<arch>-*/` 下会生成 DMG、ZIP、`SHA256SUMS.txt`、`INSTALL.md` 和 `verification.json`。DMG 包含已验签的应用和「应用程序」快捷方式。
+
+Tauri 先签内部代码，打包脚本再用 `codesign --force --options runtime --timestamp=none --sign -` 签署应用副本。严格验签后使用 `ditto` 打包 ZIP，解压后复查签名、版本、架构及内嵌界面。安装步骤见 [macOS 安装说明](macos-install.md)。
 
 ## 本地检查
 
@@ -250,7 +260,7 @@ node client/scripts/run.mjs format-check
 
 ## macOS 签名与凭据
 
-统一构建入口优先使用 `CLOUD_DECK_SIGNING_IDENTITY` 指定的签名；未指定时，自动使用本机唯一有效的 Apple Development / Developer ID Application 身份。存在多份证书时需明确指定，避免选错身份。证书和私钥不写入仓库。开发签名可保持多次构建的应用身份，但不等于 Developer ID 分发或公证。
+`desktop-build` 和原生测试优先使用 `CLOUD_DECK_SIGNING_IDENTITY` 指定的签名；未指定时，自动使用本机唯一有效的 Apple Development / Developer ID Application 身份。存在多份证书时需明确指定，避免选错身份。证书和私钥不写入仓库。开发签名可保持多次构建的应用身份，但不等于 Developer ID 分发或公证。`macos-package` 则固定使用免费 ad-hoc 签名，安装新版本可能需要再次授权钥匙串；它不承诺 Gatekeeper 免提示。
 
 应用打开窗口时只读取已保存的公开账号信息，不触碰钥匙串。首次账号/云端操作按需读取系统凭据，随后进程内复用；读取拒绝也会缓存，后台不循环弹窗。显式登录可重新尝试。登录保存和退出登录同步更新缓存，凭据不写入普通配置文件。
 

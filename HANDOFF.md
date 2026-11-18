@@ -1,8 +1,15 @@
 # Cloud Deck · 新 session 接手说明
 
-更新时间：2026-11-16
+更新时间：2026-11-18
 正式项目：本仓库根目录（`.`）
 原项目：`../../remote-ssh/ComfyUI-colab`（相对本仓库根目录）
+
+## 2026-11-18：macOS ad-hoc 分发打包
+
+- [#3 的 macOS 下载说明](https://github.com/rezoch340/cloud-deck/issues/3#issuecomment-6990318320)已附 [v0.1.2 Apple Silicon DMG](https://github.com/rezoch340/cloud-deck/releases/download/v0.1.2/CloudDeck-0.1.2-macos-arm64.dmg)。该映像从标签提交 `72e26d0` 独立构建，挂载后验签、内嵌界面检查和随包资源比对通过。GitHub 下载件与本地逐字节一致。
+- 新入口 `node client/scripts/run.mjs macos-package`：核对四处版本号，构建当前 Mac 架构的默认 release，强制使用 `-` 签名并忽略个人签名及 Apple 公证环境变量。`desktop-build` / 原生测试仍保留原有个人签名选择。macOS 继续本机构建，没有扩展 Windows CI、升级版本或发布 Release。
+- 新增 `client/scripts/package-macos.mjs`：Tauri 签内部代码，staging 副本清理扩展属性并完成最终签名；压缩前严格验签，通过 `ditto --norsrc --noextattr --noacl --keepParent` 生成 ZIP，解压后重新验签、核对版本和架构、执行 `--check-frontend-assets`。通过后才输出 ZIP、`SHA256SUMS.txt`、`INSTALL.md` 和 `verification.json`。安装说明在 `client/macos-install.md`，明确未公证、quarantine 处理及 ad-hoc 更新可能再次要求钥匙串授权。
+- 本机 arm64 构建、TS/Vite、压缩前后签名/版本/架构/内嵌界面检查、脚本语法与 diff 检查通过。产物：`/Volumes/CODEX_SCRATCH/build/cloud-deck/client/artifacts/macos-arm64-L4tLNo/CloudDeck-0.1.2-macos-arm64.app.zip`，SHA-256 `873d18c83998eb10ef880360ef539c32059f7049d6620c5c50052bac18779e0d`。这不代表 Apple 公证、另一台 Mac 的 Gatekeeper 验收或 Intel/universal 验证；未操作 Google 授权、云端实例或个人凭据。
 
 ## 2026-11-16：Windows 发行包启动报 ERR_FILE_NOT_FOUND
 

@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { packageMacos } from './package-macos.mjs';
 
 const project = fileURLToPath(new URL('..', import.meta.url));
 const workRoot = process.env.CLOUD_DECK_WORK_ROOT || (process.platform === 'darwin' ? '/Volumes/CODEX_SCRATCH' : '');
@@ -64,8 +65,8 @@ const env = {
 const mode = process.argv[2];
 const extra = process.argv.slice(3);
 const moduleFile = (...parts) => path.join(project, 'node_modules', ...parts);
-function run(command, args) {
-  const result = spawnSync(command, args, { cwd: project, env, stdio: 'inherit', shell: false });
+function run(command, args, commandEnv = env) {
+  const result = spawnSync(command, args, { cwd: project, env: commandEnv, stdio: 'inherit', shell: false });
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status || 1);
 }
@@ -73,13 +74,13 @@ function webBuild() {
   run(process.execPath, [moduleFile('typescript/bin/tsc'), '--noEmit']);
   run(process.execPath, [moduleFile('vite/bin/vite.js'), 'build']);
 }
-function desktopBuild(args) {
+function desktopBuild(args, adHoc = false) {
   webBuild();
   const localConfig = path.join(temporary, 'tauri-build.json');
   // 带盘符的绝对路径会被 Tauri 当成 URL，导致发行包没有嵌入前端文件。
   const configuration = { build: { frontendDist: '../dist' } };
   if (process.platform === 'darwin') {
-    let identity = process.env.CLOUD_DECK_SIGNING_IDENTITY;
+    let identity = adHoc ? '-' : process.env.CLOUD_DECK_SIGNING_IDENTITY;
     if (!identity) {
       const result = spawnSync('/usr/bin/security', ['find-identity', '-v', '-p', 'codesigning'], { env, encoding: 'utf8' });
       const identities = [...(result.stdout || '').matchAll(/\b([A-F0-9]{40}) "(?:Apple Development|Developer ID Application):[^"]+"/g)];
@@ -93,7 +94,11 @@ function desktopBuild(args) {
     }
   }
   fs.writeFileSync(localConfig, JSON.stringify(configuration));
-  run(process.execPath, [moduleFile('@tauri-apps/cli/tauri.js'), 'build', '--config', localConfig, ...args]);
+  // 分发入口不导入个人证书，也不因外部 Apple 环境变量触发公证上传。
+  const signingEnv = adHoc
+    ? { ...Object.fromEntries(Object.entries(env).filter(([name]) => !name.startsWith('APPLE_'))), APPLE_SIGNING_IDENTITY: '-' }
+    : env;
+  run(process.execPath, [moduleFile('@tauri-apps/cli/tauri.js'), 'build', '--config', localConfig, ...args], signingEnv);
 }
 function packageManager() {
   if (process.env.npm_execpath && /pnpm/i.test(path.basename(process.env.npm_execpath))) return process.env.npm_execpath;
@@ -113,7 +118,7 @@ function packageManager() {
   throw new Error('未找到现有 pnpm；构建不会自动向系统盘安装包管理器。');
 }
 const manifest = path.join(project, 'src-tauri/Cargo.toml');
-if (['rust-check', 'rust-test', 'desktop-build', 'native-check', 'live-check'].includes(mode) && !fs.existsSync(path.join(build, 'icons/icon.png'))) {
+if (['rust-check', 'rust-test', 'desktop-build', 'macos-package', 'native-check', 'live-check'].includes(mode) && !fs.existsSync(path.join(build, 'icons/icon.png'))) {
   run(process.execPath, [moduleFile('@tauri-apps/cli/tauri.js'), 'icon', path.join(project, 'app-icon.svg'), '--output', path.join(build, 'icons')]);
 }
 if (mode === 'install') {
@@ -131,6 +136,13 @@ else if (mode === 'rust-test') run(path.join(rustBin, `cargo${exe}`), ['test', '
 else if (mode === 'rust-check') run(path.join(rustBin, `cargo${exe}`), ['check', '--manifest-path', manifest, '--no-default-features', ...extra]);
 else if (mode === 'rust-fmt') run(path.join(rustBin, `cargo${exe}`), ['fmt', '--manifest-path', manifest, ...extra]);
 else if (mode === 'desktop-build') desktopBuild(extra);
+else if (mode === 'macos-package') {
+  if (process.platform !== 'darwin') throw new Error('macos-package 只能在 macOS 上执行。');
+  if (extra.length) throw new Error('macos-package 构建当前 Mac 架构的默认 release，不接受额外构建参数。');
+  run(process.execPath, [path.join(project, 'scripts/sync-version.mjs'), JSON.parse(fs.readFileSync(path.join(project, 'package.json'), 'utf8')).version, '--check']);
+  desktopBuild(['--bundles', 'app'], true);
+  packageMacos({ project, build, temporary, env });
+}
 else if (mode === 'native-check' || mode === 'live-check') {
   const live = mode === 'live-check';
   const manifestCheck = live && extra.includes('--manifest');
@@ -191,4 +203,4 @@ else if (mode === 'native-check' || mode === 'live-check') {
   if (result.error || result.status !== 0 || !report.passed || !report.nativeScreenshot || (keepOpen && !result.nativeProcessId)) process.exit(1);
 } else if (mode === 'paths') {
   console.log(JSON.stringify(Object.fromEntries(Object.entries(env).filter(([key]) => /^(CLOUD_DECK_|CARGO_|RUSTUP_HOME|CLANG_|TAURI_|TMP|TEMP|XDG_|NPM_CONFIG_CACHE|PNPM_HOME)/.test(key))), null, 2));
-} else throw new Error('Expected install, dev, web-build, test, format, format-check, rust-test, rust-check, rust-fmt, desktop-build, native-check, live-check or paths.');
+} else throw new Error('Expected install, dev, web-build, test, format, format-check, rust-test, rust-check, rust-fmt, desktop-build, macos-package, native-check, live-check or paths.');
